@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AlphaWrite SRSD Activity Visualizations — v2</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f7fa;color:#1a1a2e;line-height:1.7;font-size:15px}
+.header{background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;padding:28px 32px;position:sticky;top:0;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.header h1{font-size:1.4rem;font-weight:700}
+.header p{opacity:0.7;font-size:0.82rem;margin-top:4px}
+.nav{display:flex;gap:0;overflow-x:auto;background:#16213e;border-bottom:2px solid #0f3460;padding:0 16px}
+.nav button{padding:12px 16px;border:none;background:transparent;color:#8899aa;cursor:pointer;font-size:0.78rem;white-space:nowrap;transition:all 0.2s;border-bottom:3px solid transparent;font-weight:500}
+.nav button:hover{color:#ccc;background:rgba(255,255,255,0.03)}
+.nav button.active{color:white;border-bottom-color:#4fc3f7;background:rgba(79,195,247,0.08);font-weight:600}
+.container{max-width:900px;margin:0 auto;padding:40px 24px 80px}
+.tab{display:none}.tab.active{display:block}
+h2{font-size:1.5rem;color:#1a1a2e;margin-bottom:6px}
+h3{font-size:1.15rem;margin:24px 0 12px;color:#1a1a2e}
+h4{font-size:1rem;margin:16px 0 8px;color:#333}
+.meta{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0 20px}
+.badge{padding:4px 12px;border-radius:20px;font-size:0.72rem;font-weight:600}
+.b-pos{background:#e3f2fd;color:#1565c0}
+.b-mne{background:#f3e5f5;color:#7b1fa2}
+.b-pre{background:#fff3e0;color:#e65100}
+.section-box{background:white;border-radius:12px;padding:24px;margin:20px 0;box-shadow:0 2px 8px rgba(0,0,0,0.05)}
+.section-box.why{border-left:4px solid #1976d2}
+.section-box.mnemonic{border:2px solid #7b1fa2}
+.section-box.step{border-left:4px solid #ccc}
+.section-box.step-see{border-left-color:#2196f3}
+.section-box.step-plan{border-left-color:#9c27b0}
+.section-box.step-do{border-left-color:#4caf50}
+.section-box.step-check{border-left-color:#ff9800}
+.step-tag{font-size:0.68rem;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:6px}
+.step-see .step-tag{color:#2196f3}
+.step-plan .step-tag{color:#9c27b0}
+.step-do .step-tag{color:#4caf50}
+.step-check .step-tag{color:#ff9800}
+.mn-letter{display:flex;gap:10px;margin:6px 0;align-items:baseline}
+.mn-letter strong{color:#7b1fa2;font-size:1.05rem;min-width:22px}
+.ex{background:#f8f9fa;border-radius:8px;padding:14px;margin:10px 0;border:1px solid #e9ecef}
+.ex.good{border-left:3px solid #4caf50}
+.ex.bad{border-left:3px solid #f44336}
+.ex.neutral{border-left:3px solid #90a4ae}
+.ex-label{font-size:0.68rem;text-transform:uppercase;font-weight:700;margin-bottom:4px}
+.ex-label.g{color:#4caf50}.ex-label.b{color:#f44336}.ex-label.n{color:#607d8b}
+.field{display:flex;gap:8px;margin:6px 0;padding:10px 14px;background:#faf5ff;border-radius:6px;border:1px solid #e1bee7}
+.field b{color:#7b1fa2;min-width:20px}
+.field span{flex:1;color:#37474f;font-size:0.9rem}
+.passage{background:#fffde7;padding:14px;border-radius:8px;border:1px solid #fff9c4;margin:12px 0;font-size:0.88rem}
+.passage::before{content:"Passage:";display:block;font-size:0.68rem;text-transform:uppercase;font-weight:700;color:#f57f17;margin-bottom:6px}
+.prompt{background:#e8eaf6;padding:12px 16px;border-radius:8px;border:1px solid #c5cae9;margin:12px 0;font-weight:500}
+.prompt::before{content:"Prompt:";display:block;font-size:0.68rem;text-transform:uppercase;font-weight:700;color:#283593;margin-bottom:4px}
+.error-card{background:white;border-radius:10px;margin:10px 0;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.06);border:1px solid #ffcdd2}
+.error-hdr{padding:14px 18px;background:#fff8f8;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.error-hdr:hover{background:#ffebee}
+.error-hdr h4{color:#c62828;font-size:0.88rem;margin:0}
+.error-arr{transition:transform 0.2s;color:#c62828;font-size:0.8rem}
+.error-card.open .error-arr{transform:rotate(180deg)}
+.error-body{display:none;padding:14px 18px}
+.error-card.open .error-body{display:block}
+.err-student{background:#fff3e0;padding:12px;border-radius:6px;margin-bottom:10px;font-style:italic}
+.err-student::before{content:"Student writes:";display:block;font-size:0.68rem;text-transform:uppercase;font-weight:700;color:#e65100;margin-bottom:4px;font-style:normal}
+.ai-fb{background:#e3f2fd;padding:12px;border-radius:6px;border-left:3px solid #1976d2}
+.ai-fb::before{content:"AI Feedback:";display:block;font-size:0.68rem;text-transform:uppercase;font-weight:700;color:#1565c0;margin-bottom:4px}
+.verify-q{background:#fff8e1;padding:14px;border-radius:8px;margin:8px 0;border:1px solid #ffecb3}
+.verify-q .q-label{font-size:0.72rem;text-transform:uppercase;font-weight:700;color:#f57f17;margin-bottom:4px}
+.verify-q .q-text{font-weight:600;margin-bottom:6px}
+.verify-q .q-response{color:#555;font-size:0.88rem}
+.verify-q .q-ai{background:#e3f2fd;padding:10px;border-radius:6px;margin-top:8px;font-size:0.88rem;border-left:3px solid #1976d2}
+.gate-box{background:linear-gradient(135deg,#1a1a2e,#16213e);color:white;border-radius:12px;padding:24px;margin:16px 0}
+.gate-box h4{color:#4fc3f7;margin-bottom:8px}
+.seq-row{display:flex;align-items:center;gap:8px;margin:4px 0;padding:6px 12px;border-radius:6px;font-size:0.84rem}
+.seq-row.existing{background:#f5f5f5;color:#616161}
+.seq-row.new{background:#e8f5e9;color:#2e7d32;font-weight:600}
+.seq-row.redesigned{background:#fff8e1;color:#f57f17;font-weight:600}
+.seq-num{min-width:28px;font-weight:700}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:0.85rem}
+th{background:#f5f5f5;padding:8px 12px;text-align:left;border-bottom:2px solid #ddd}
+td{padding:8px 12px;border-bottom:1px solid #eee}
+.divider{border:none;border-top:1px solid #e0e0e0;margin:32px 0}
+@media(max-width:768px){.container{padding:20px 14px}.nav button{padding:10px 10px;font-size:0.7rem}}
+</style>
+</head>
+<body>
+<div class="header">
+<h1>AlphaWrite SRSD Activity Visualizations — v2</h1>
+<p>Full activity specs with SRSD skill descriptions, detailed question examples, model answers, error types, AI feedback, and redesigned self-checks</p>
+</div>
+<div class="nav" id="nav">
+<button class="active" data-tab="map">Course Map</button>
+<button data-tab="scan">SCAN</button>
+<button data-tab="gate-s">Sentence Gate</button>
+<button data-tab="prove">PROVE</button>
+<button data-tab="tree">TREE</button>
+<button data-tab="tide">TIDE</button>
+<button data-tab="cops">COPS</button>
+<button data-tab="multi">Multi-Para</button>
+<button data-tab="gate-e">ECR Gate</button>
+</div>
+<div class="container">
+
+<!-- ===== COURSE MAP ===== -->
+<div class="tab active" id="t-map">
+<h2>Revised Course Sequence</h2>
+<p style="margin:8px 0 20px;color:#555">Green = new activity. Yellow = redesigned. Gray = unchanged.</p>
+
+<div class="section-box">
+<h3>Sentences G3-G5</h3>
+<div class="seq-row existing"><span class="seq-num">[1]</span> Fragment or Sentence?</div>
+<div class="seq-row existing"><span class="seq-num">[2]</span> Unscramble Sentences</div>
+<div class="seq-row existing"><span class="seq-num">[3]</span> Identify Sentence Type</div>
+<div class="seq-row existing"><span class="seq-num">[4]</span> Change Sentences into Questions</div>
+<div class="seq-row existing"><span class="seq-num">[5]</span> Change the Sentence Type</div>
+<div class="seq-row existing"><span class="seq-num">[6]</span> Write the Sentence Type</div>
+<div class="seq-row existing"><span class="seq-num">[7]</span> Because, But, So</div>
+<div class="seq-row existing"><span class="seq-num">[8]</span> Identify Appositives</div>
+<div class="seq-row existing"><span class="seq-num">[9]</span> Write Appositives</div>
+<div class="seq-row existing"><span class="seq-num">[10]</span> Subordinating Conjunctions</div>
+<div class="seq-row new"><span class="seq-num">[11]</span> Fix Run-Ons & Comma Splices (SCAN) — NEW</div>
+<div class="seq-row existing"><span class="seq-num">[12]</span> Combine Sentences</div>
+<div class="seq-row existing"><span class="seq-num">[13]</span> Kernel Expansion</div>
+<div class="seq-row existing"><span class="seq-num">[14]</span> Write Sentence from Prompt</div>
+<div class="seq-row existing"><span class="seq-num">[15]</span> Combine Sentences with Appositives</div>
+<div class="seq-row new"><span class="seq-num">[16]</span> Sentence Mastery Gate — NEW (discrimination + repair)</div>
+</div>
+
+<div class="section-box">
+<h3>Paragraphs G3-G5</h3>
+<div class="seq-row existing"><span class="seq-num">[1-8]</span> Identify TS → Brainstorm → Sequence → Eliminate → Write TS → Write CS → Make TS → Use Three Strategies</div>
+<div class="seq-row existing"><span class="seq-num">[9]</span> Turn Paragraph into SPO</div>
+<div class="seq-row existing"><span class="seq-num">[10]</span> Writing Single Paragraph Outlines</div>
+<div class="seq-row redesigned"><span class="seq-num">[11]</span> Turn YOUR Outline into Draft — REDESIGNED (plan-to-draft)</div>
+<div class="seq-row existing"><span class="seq-num">[12]</span> Elaborate on Paragraphs</div>
+<div class="seq-row existing"><span class="seq-num">[13]</span> Using Transition Words</div>
+<div class="seq-row existing"><span class="seq-num">[14]</span> Finishing Transition Words</div>
+<div class="seq-row new"><span class="seq-num">[15]</span> Write Supporting Details (PROVE) — NEW</div>
+<div class="seq-row new"><span class="seq-num">[16]</span> Write a Paragraph — Opinion (TREE) — NEW (scaffolded strategy practice)</div>
+<div class="seq-row new"><span class="seq-num">[17]</span> Write a Paragraph — Informational (TIDE) — NEW (scaffolded strategy practice)</div>
+<div class="seq-row existing"><span class="seq-num">[18]</span> Write a Paragraph from Prompt (existing — unscaffolded mastery check)</div>
+<div class="seq-row existing"><span class="seq-num">[19]</span> Write a Free-Form Paragraph (existing — independent practice)</div>
+<div class="seq-row new"><span class="seq-num">[20]</span> Edit a Paragraph (COPS) — NEW</div>
+<div class="seq-row new"><span class="seq-num">[21]</span> Paragraph Mastery Gate — NEW</div>
+</div>
+
+<div class="section-box">
+<h3>Multi-Paragraph G3-G5 (New Course)</h3>
+<p style="font-size:0.84rem;color:#666;margin-bottom:10px">Prerequisite: Paragraph Mastery Gate passed</p>
+<div class="seq-row new"><span class="seq-num">[1]</span> Multi-Paragraph Opinion (TREE at essay level)</div>
+<div class="seq-row new"><span class="seq-num">[2]</span> Multi-Paragraph Informational (TIDE at essay level)</div>
+<div class="seq-row new"><span class="seq-num">[3]</span> Reading SCR (R.A.P.S.)</div>
+<div class="seq-row new"><span class="seq-num">[4]</span> ECR Mastery Gate (STAAR simulation)</div>
+</div>
+
+<div class="section-box">
+<h3>Note on Sentence Mastery Gate vs. Existing Sentence Mastery Activity</h3>
+<p>The current Sentence Mastery activity tests <strong>production</strong> — students write, combine, and transform sentences without scaffolding. The new Sentence Mastery Gate tests <strong>discrimination + repair</strong> — students identify errors in connected text and fix them. These are complementary skills. Both should exist:</p>
+<table>
+<tr><th>Activity</th><th>What it tests</th><th>Cognitive demand</th></tr>
+<tr><td>Current Sentence Mastery</td><td>Can you PRODUCE correct sentences?</td><td>Generate from scratch under varied constraints</td></tr>
+<tr><td>NEW Sentence Mastery Gate</td><td>Can you FIND and FIX errors in someone else's writing?</td><td>Diagnose + repair in context (editing mode)</td></tr>
+</table>
+<p style="margin-top:12px">Students need both because STAAR tests both: the Writing SCR asks students to rewrite/fix sentences (the gate tests this). Production mastery ensures they write correct sentences in their own essays.</p>
+</div>
+</div>
+
+<!-- ===== SCAN TAB ===== -->
+<div class="tab" id="t-scan">
+<h2>Fix Run-Ons & Comma Splices</h2>
+<div class="meta">
+<span class="badge b-pos">Sentences Skill 11</span>
+<span class="badge b-mne">SCAN</span>
+<span class="badge b-pre">Before: Combine Sentences</span>
+</div>
+
+<div class="section-box why">
+<h3>What SRSD Skill Is Being Taught</h3>
+<p><strong>Skill:</strong> Identifying and repairing run-on sentences and comma splices using a named, memorizable procedure (SCAN).</p>
+<p style="margin-top:12px"><strong>Why it matters:</strong></p>
+<ul style="margin:8px 0 8px 20px">
+<li><strong>STAAR alignment:</strong> The Writing SCR (1 point, every test) asks students to rewrite a flawed sentence. Run-ons and comma splices are the most common error type tested.</li>
+<li><strong>Placement rationale:</strong> Students have just learned all the ways to correctly join clauses (skills 7-10: BBS, subordinating). SCAN teaches them to DIAGNOSE when a join is broken — discrimination before production. They must see what "wrong" looks like before being asked to combine sentences correctly in skill 12.</li>
+<li><strong>Current challenge it resolves:</strong> 5 students in the testing loop are plateaued on sentence-combining after 60-150 reps. They may be producing the very errors they can't diagnose. Teaching error recognition (SCAN) before production (Combine) may break the plateau by building the discrimination foundation that production depends on.</li>
+<li><strong>Transfer mechanism:</strong> SCAN is a named strategy students memorize. On STAAR, when they see a sentence that "sounds wrong," they have a procedure: Stop → Count → Apply → Name. Without SCAN, they rely on intuition (which fails under pressure).</li>
+</ul>
+</div>
+
+<div class="section-box mnemonic">
+<h3>SCAN Strategy</h3>
+<div class="mn-letter"><strong>S</strong><span><strong>Stop</strong> at each period or comma. Is there a full thought on each side?</span></div>
+<div class="mn-letter"><strong>C</strong><span><strong>Count</strong> the independent clauses. More than one with no proper join = problem.</span></div>
+<div class="mn-letter"><strong>A</strong><span><strong>Apply</strong> a fix: period (split), semicolon, or comma + conjunction.</span></div>
+<div class="mn-letter"><strong>N</strong><span><strong>Name</strong> your fix in your own words ("I split it because..." / "I added 'but' because...").</span></div>
+</div>
+
+<!-- SCAN STEP 1 -->
+<div class="section-box step step-see">
+<div class="step-tag">Step 1 — See It (Discrimination)</div>
+<h4>Question Type: Multiple-select identification</h4>
+<p>Student sees 5-6 sentences. They tap ALL sentences that contain a run-on or comma splice. Correct sentences should not be selected.</p>
+
+<h4 style="margin-top:16px">Model question:</h4>
+<p style="margin-bottom:8px"><em>"Tap every sentence below that has a problem. Some are correct — leave those alone."</em></p>
+
+<div class="ex good"><div class="ex-label g">Sentence 1 — Correct (don't tap)</div>"She ran fast, and she won the race."<br><small style="color:#666">Reason: Two clauses properly joined with comma + coordinating conjunction.</small></div>
+
+<div class="ex bad"><div class="ex-label b">Sentence 2 — Run-on (tap this)</div>"She ran fast she won the race."<br><small style="color:#666">Reason: Two independent clauses with NO join between them.</small></div>
+
+<div class="ex bad"><div class="ex-label b">Sentence 3 — Comma splice (tap this)</div>"She ran fast, she won the race."<br><small style="color:#666">Reason: Two independent clauses joined ONLY by a comma (no conjunction).</small></div>
+
+<div class="ex good"><div class="ex-label g">Sentence 4 — Correct (don't tap)</div>"Although the test was hard, most students passed."<br><small style="color:#666">Reason: Subordinating conjunction creates a dependent clause — not two independent clauses.</small></div>
+
+<div class="ex bad"><div class="ex-label b">Sentence 5 — Run-on (tap this)</div>"The movie was great we stayed up late talking about it."<br><small style="color:#666">Reason: Two complete thoughts with no punctuation or conjunction between them.</small></div>
+
+<h4 style="margin-top:20px">Expected errors & feedback:</h4>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Student taps sentence 4 (marks correct sentence as wrong)</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">Taps "Although the test was hard, most students passed."</div>
+<div class="ai-fb">This sentence looks like it has two parts, but it's actually correct. "Although the test was hard" starts with "although" — a subordinating conjunction — which makes it a DEPENDENT clause. It can't stand alone. Only join problems happen between two INDEPENDENT clauses (two parts that could each be their own sentence). "Although the test was hard" can't be a sentence by itself, so there's no run-on here.</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Student misses sentence 3 (doesn't recognize comma splice)</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">Correctly taps sentences 2 and 5 but leaves sentence 3 untapped.</div>
+<div class="ai-fb">You found the run-ons where there's NO punctuation — good eye. But look at sentence 3: "She ran fast, she won the race." There IS a comma, but is a comma ALONE enough to join two complete thoughts? Try the S-test: cover everything after the comma. "She ran fast" — complete thought? Yes. "She won the race" — complete thought? Yes. Two complete thoughts joined only by a comma = comma splice. It needs either a period, a semicolon, or a comma WITH a conjunction (like 'and' or 'so').</div>
+</div>
+</div>
+</div>
+
+<!-- SCAN STEP 2 -->
+<div class="section-box step step-plan">
+<div class="step-tag">Step 2 — Plan It (SCAN Strategy)</div>
+<h4>Question Type: Structured multi-field — sequential guided questions</h4>
+<p>One broken sentence is presented. Student works through each SCAN field sequentially. Each field is a specific question with a defined response type.</p>
+
+<h4 style="margin-top:16px">Sentence presented:</h4>
+<div class="ex bad"><div class="ex-label b">Sentence to fix</div>"The dog barked loudly the cat ran away."</div>
+
+<h4 style="margin-top:20px">Field 1: S — Stop (tap interaction)</h4>
+<div class="field"><b>S</b><span><strong>Question shown:</strong> "Read this sentence. Tap where you think one complete thought ENDS and a new one BEGINS."<br><br><strong>How student responds:</strong> Taps between words in the sentence. The sentence is displayed as tappable word gaps:<br><code>The | dog | barked | loudly | ← TAP HERE → | the | cat | ran | away.</code><br><br><strong>Correct response:</strong> Tap between "loudly" and "the"<br><br><strong>If correct:</strong> "Yes! 'The dog barked loudly' is one complete thought. 'The cat ran away' is another. You found the boundary."<br><strong>If wrong (e.g., taps after "dog"):</strong> "Check: is 'The dog' a complete sentence on its own? No — what did the dog do? It's missing the action. Keep reading until you have a full thought that makes sense alone."</span></div>
+
+<h4 style="margin-top:20px">Field 2: C — Count (multiple choice)</h4>
+<div class="field"><b>C</b><span><strong>Question shown:</strong> "How many complete thoughts (independent clauses) are in this sentence?"<br><br><strong>Choices:</strong><br>○ 1 complete thought<br>○ <strong>2 complete thoughts ✓</strong><br>○ 3 complete thoughts<br><br><strong>If correct:</strong> "Right — there are 2: 'The dog barked loudly' AND 'the cat ran away.' Both can stand alone."<br><strong>If wrong (selects 1):</strong> "Try reading each side of the boundary you found. 'The dog barked loudly' — could that be its own sentence? Yes. 'The cat ran away' — could that? Yes. That's 2 complete thoughts, not 1."</span></div>
+
+<h4 style="margin-top:20px">Field 3: A — Apply (multiple choice, grade-dependent)</h4>
+<div class="field"><b>A</b><span><strong>Question shown:</strong> "How will you fix it? Choose one:"<br><br><strong>G3-G5 choices:</strong><br>○ <strong>Split into two sentences</strong> (put a period between them)<br>○ <strong>Join with comma + and</strong> (the second thought ADDS to the first)<br>○ <strong>Join with comma + but</strong> (the second thought CONTRASTS with the first)<br>○ <strong>Join with comma + so</strong> (the second thought is the RESULT of the first)<br><br><strong>G6-G8 adds:</strong><br>○ <strong>Join with a semicolon</strong> (the thoughts are closely related but you don't need a conjunction)<br><br><strong>Key design choice:</strong> The conjunction options include the RELATIONSHIP in parentheses. This scaffolds the N step — students are already thinking about the relationship when they choose. They don't need to know grammar terms; they just need to identify: "Is the second thought adding something, contrasting, or a result?"<br><br><strong>Model correct choice:</strong> "Join with comma + so" (the cat running away is the RESULT of the barking)</span></div>
+
+<h4 style="margin-top:20px">Field 4: N — Name (scaffolded sentence starter)</h4>
+<div class="field"><b>N</b><span><strong>Question shown:</strong> "Complete this sentence to explain your fix:"<br><br><strong>Sentence starter (based on what they selected in A):</strong><br><br>If they chose "Split into two sentences":<br>→ "I split it because these two thoughts are _______________."<br><em>Model completion:</em> "separate ideas that don't need to be connected"<br><br>If they chose "comma + and":<br>→ "I used 'and' because the second thought _______________."<br><em>Model completion:</em> "adds more information about what happened"<br><br>If they chose "comma + but":<br>→ "I used 'but' because the second thought _______________."<br><em>Model completion:</em> "is surprising or different from what you'd expect"<br><br>If they chose "comma + so":<br>→ "I used 'so' because the second thought _______________."<br><em>Model completion:</em> "happened as a result of the first thing"<br><br><strong>Why sentence starters work:</strong> Students don't need to generate the explanation from scratch. The starter provides the grammatical frame; they just complete the reasoning. This is the same principle as Because, But, So — students are extending a stem, not writing from a blank field.<br><br><strong>If student writes something incoherent or off-topic:</strong><br>AI feedback: "Look at the two thoughts: 'The dog barked loudly' and 'the cat ran away.' Did the cat run away AS A RESULT of the barking? Or are these just two separate things that happened? Your answer to that question tells you which conjunction to use."</span></div>
+
+<h4 style="margin-top:20px">Expected errors & feedback:</h4>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Wrong boundary — student taps after "dog"</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">Taps between "dog" and "barked" → splitting into "The dog" | "barked loudly the cat ran away."</div>
+<div class="ai-fb">For S (Stop), you need to find where one COMPLETE thought ends. Test each side: "The dog" — is that a complete sentence on its own? No — what did the dog do? It's missing the action. Keep reading until you have a full thought that works alone as a sentence. Try: "The dog barked loudly" — could THAT be a sentence? Yes! That's where the first thought ends.</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Chooses "split" when there's a cause-effect relationship</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">A: "Split into two sentences." N: "I split it because these two thoughts are separate ideas."</div>
+<div class="ai-fb">A period IS grammatically correct here. But read the two thoughts together: "The dog barked loudly. The cat ran away." Does the order matter? Did the cat run away BECAUSE of the barking? If so, there's a cause-and-result relationship — the second thing happened because of the first. When thoughts have that kind of connection, a conjunction like 'so' keeps the relationship visible to the reader: "The dog barked loudly, so the cat ran away." A period isn't wrong, but it loses the connection. Which version helps the reader understand WHY the cat ran?</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Chooses wrong conjunction (e.g., "but" for a cause-effect)</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">A: "Join with comma + but." N: "I used 'but' because the second thought is different."</div>
+<div class="ai-fb">Think about what 'but' means: it signals CONTRAST or SURPRISE. "The dog barked loudly, BUT the cat ran away" implies it's SURPRISING that the cat ran. Is that surprising? Not really — loud barking would naturally make a cat run. The relationship here is RESULT, not contrast: the barking CAUSED the running. That's 'so': "The dog barked loudly, SO the cat ran away." Try reading both versions out loud — which one matches what actually happened?</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>N step — student can't complete the sentence starter</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">Chose "comma + so" but for N writes: "I used 'so' because the second thought... I don't know."</div>
+<div class="ai-fb">Let's think about it together. You chose 'so' — that means you sensed the second thought is a RESULT of the first. Let's check: What happened first? (The dog barked loudly.) What happened second? (The cat ran away.) Did the second thing happen BECAUSE of the first thing? If yes, then you can write: "I used 'so' because the cat ran away as a result of the loud barking." Try completing it: "I used 'so' because the second thought happened because of ___."</div>
+</div>
+</div>
+</div>
+
+<!-- SCAN STEP 3 -->
+<div class="section-box step step-do">
+<div class="step-tag">Step 3 — Do It (Production — GRADED)</div>
+<h4>Question Type: Text input — rewrite the sentence</h4>
+<p>Student types the corrected sentence using their chosen fix from Step 2. Their SCAN plan is visible for reference.</p>
+
+<h4 style="margin-top:16px">Model answer:</h4>
+<div class="ex good"><div class="ex-label g">Student writes</div>"The dog barked loudly, so the cat ran away."</div>
+
+<h4 style="margin-top:16px">AI grading criteria:</h4>
+<ul style="margin-left:20px">
+<li>Is the sentence grammatically correct? (no run-on, no splice remaining)</li>
+<li>Is the meaning preserved from the original?</li>
+<li>Does the fix match what the student planned in Step 2 (A field)?</li>
+</ul>
+
+<h4 style="margin-top:20px">Expected errors & feedback:</h4>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Adds comma without conjunction (creates comma splice)</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">"The dog barked loudly, the cat ran away."</div>
+<div class="ai-fb">You added a comma — but a comma ALONE can't join two independent clauses. That's the exact error we're trying to fix (a comma splice). In your A step, you chose "comma + conjunction." You have the comma, but where's the conjunction? Add a word like 'so', 'and', or 'but' after the comma: "The dog barked loudly, <strong>so</strong> the cat ran away."</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Uses conjunction without comma</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">"The dog barked loudly so the cat ran away."</div>
+<div class="ai-fb">Good choice of conjunction — 'so' shows cause-and-effect. But when joining two independent clauses with a coordinating conjunction (and, but, so, or, yet), you need a comma BEFORE the conjunction: "The dog barked loudly<strong>,</strong> so the cat ran away." The comma signals to the reader: "a new independent clause is coming."</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Changes meaning with wrong conjunction</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">"The dog barked loudly, but the cat ran away."</div>
+<div class="ai-fb">Grammatically correct — two clauses properly joined. But does "but" capture the right relationship? "But" means contrast/surprise. Was it surprising that the cat ran away from loud barking? Probably not — running away is the EXPECTED result. 'So' (result) or 'and' (addition) would preserve the original meaning better. Think about your N step: what's the relationship between these thoughts?</div>
+</div>
+</div>
+</div>
+
+<!-- SCAN STEP 4 (SELF-CHECK) -->
+<div class="section-box step step-check">
+<div class="step-tag">Step 4 — Verify It (Targeted Verification Questions)</div>
+<h4>Question Type: Specific questions about their fix — mix of typing and multiple choice</h4>
+<p>Instead of generic checkboxes, students answer questions about their OWN fix. Some require typing (forces re-reading), some are MC (reduces frustration for students who struggle to articulate). The AI compares answers to the submitted fix.</p>
+
+<div class="verify-q">
+<div class="q-label">Verification Question 1 (type response)</div>
+<div class="q-text">"Type the FIRST complete thought from your fixed sentence."</div>
+<div class="q-response"><em>Student types:</em> "The dog barked loudly"</div>
+<div class="q-ai"><strong>AI checks:</strong> Yes — "The dog barked loudly" has a subject (dog) and a verb (barked). It works as its own sentence. ✓<br><br><strong>If student types something incomplete</strong> (e.g., "The dog"):<br>"That's not a complete thought yet — what did the dog DO? Keep going until you have a subject + verb that makes sense alone."<br><br><strong>If student types the whole fixed sentence</strong> (e.g., "The dog barked loudly, so the cat ran away"):<br>"That's your whole sentence, not just the FIRST complete thought. Find where one thought ends: 'The dog barked loudly' — stop there. That's thought #1."</div>
+</div>
+
+<div class="verify-q">
+<div class="q-label">Verification Question 2 (type response)</div>
+<div class="q-text">"Type the SECOND complete thought from your fixed sentence."</div>
+<div class="q-response"><em>Student types:</em> "the cat ran away"</div>
+<div class="q-ai"><strong>AI checks:</strong> Yes — "the cat ran away" has a subject (cat) and a verb (ran). It works as its own sentence. ✓<br><br><strong>If student includes the conjunction</strong> (e.g., "so the cat ran away"):<br>"You included 'so' — that's the conjunction that CONNECTS the two thoughts, but it's not part of the second thought itself. The second complete thought is 'the cat ran away.' The 'so' just tells the reader about the relationship between them."</div>
+</div>
+
+<div class="verify-q">
+<div class="q-label">Verification Question 3 (multiple choice — scaffolded)</div>
+<div class="q-text">"What is the RELATIONSHIP between these two thoughts?"</div>
+<p style="margin:8px 0;font-size:0.9rem"><strong>Choices:</strong></p>
+<ul style="margin-left:20px;font-size:0.9rem">
+<li>○ The second thought ADDS more information (and)</li>
+<li>○ The second thought is SURPRISING or OPPOSITE (but)</li>
+<li>● <strong>The second thought is a RESULT of the first (so) ✓</strong></li>
+<li>○ The two thoughts are UNRELATED (period — separate sentences)</li>
+</ul>
+<div class="q-ai" style="margin-top:12px"><strong>If correct (selects "result"):</strong> "Right — the cat ran away BECAUSE of the barking. Your fix uses 'so,' which signals a result. The meaning is preserved. ✓"<br><br><strong>If wrong (e.g., selects "adds more"):</strong> "Think about it: did the cat running away just happen to occur at the same time as the barking? Or did the barking CAUSE the cat to run? If the barking caused it, that's a result relationship — 'so.' If you used 'and' in your fix, it would work grammatically but lose the cause-and-effect meaning."<br><br><strong>If selects "unrelated":</strong> "If these thoughts were truly unrelated, the writer wouldn't have put them next to each other. Read them together: a dog barked loudly... a cat ran away. Is there a connection? Most readers would see cause-and-effect: the loud bark scared the cat. If your fix was a period (two separate sentences), you're not wrong grammatically — but you lost that connection for the reader."</div>
+</div>
+
+<p style="margin-top:20px;font-size:0.88rem;color:#555"><strong>Why this design works:</strong></p>
+<ul style="margin-left:20px;font-size:0.88rem;color:#555">
+<li><strong>Q1 and Q2 (typing)</strong> force students to re-read their fix and identify the two independent clauses. If they can't, the AI catches it before grading: "You couldn't identify the two thoughts — that means your fix might still be broken."</li>
+<li><strong>Q3 (multiple choice)</strong> avoids the "I don't know how to answer" problem. Students don't need to articulate the relationship from scratch — they select from labeled options that include the plain-English meaning (ADDS, SURPRISING, RESULT, UNRELATED). This matches how Because, But, So was taught: students already know cause/contrast/result from BBS — Q3 just asks them to apply that knowledge.</li>
+<li><strong>The Q3 options mirror the A step options:</strong> "and" = adds, "but" = surprising/contrast, "so" = result, "period" = unrelated. If their Q3 answer doesn't match their A step choice, the AI surfaces the mismatch: "You chose 'and' (adds) in your fix, but you just said the relationship is 'result.' Those don't match — the conjunction should signal the actual relationship. Would 'so' be a better choice?"</li>
+</ul>
+</div>
+
+</div><!-- end SCAN tab -->
+
+<!-- ===== SENTENCE GATE TAB ===== -->
+<div class="tab" id="t-gate-s">
+<h2>Sentence Mastery Gate</h2>
+<div class="meta">
+<span class="badge b-pos">Sentences Skill 16 (Final)</span>
+<span class="badge b-mne">No scaffold</span>
+<span class="badge b-pre">All Sentences skills mastered</span>
+</div>
+
+<div class="section-box why">
+<h3>What SRSD Skill Is Being Taught</h3>
+<p><strong>Skill:</strong> Independent error diagnosis and repair in connected text — finding and fixing sentence-level errors in a full paragraph without any strategy labels, hints, or scaffolding.</p>
+<p style="margin-top:12px"><strong>Why it matters:</strong></p>
+<ul style="margin:8px 0 8px 20px">
+<li><strong>Complements existing Sentence Mastery activity:</strong> The current mastery tests PRODUCTION (write/combine/transform sentences). This gate tests DISCRIMINATION + REPAIR (find and fix errors in context). Both are needed: STAAR tests both.</li>
+<li><strong>Tests transfer to context:</strong> Students may fix a run-on in isolation but miss it inside a paragraph where meaning flows across the error. This tests whether error-identification skills work in connected text.</li>
+<li><strong>Prerequisite validation:</strong> This gate proves students can independently apply sentence skills before advancing to Paragraphs. Without it, scaffold-dependent mastery at the sentence level propagates upward — students write paragraphs with sentence errors they can't catch.</li>
+<li><strong>One shot, no revision:</strong> Mirrors test conditions. The first draft is the score. This is the first time students encounter "no revision" in the platform — preparing them for the Paragraph and ECR Mastery Gates.</li>
+</ul>
+</div>
+
+<div class="gate-box">
+<h4>Gate Design</h4>
+<p>One step. No SCAN labels. No hints. No tutorial. No revision loop.<br>Student sees a paragraph with embedded errors and must fix ALL of them in one pass.</p>
+</div>
+
+<div class="section-box step step-do">
+<div class="step-tag">Single Step — Find & Fix All Errors</div>
+<h4>Question Type: Full paragraph rewrite</h4>
+
+<h4>Student sees:</h4>
+<div class="ex neutral"><div class="ex-label n">Paragraph (G4 level, 4 errors embedded)</div>"My sister loves painting she spends hours in her studio every weekend. Her favorite medium is watercolors. Because they create soft beautiful effects. She has won three awards at the county fair, her work hangs in the library."</div>
+
+<h4 style="margin-top:16px">Errors to find:</h4>
+<table>
+<tr><th>Error</th><th>Type</th><th>Acceptable fix(es)</th></tr>
+<tr><td>"loves painting she spends"</td><td>Run-on</td><td>Period + new sentence / "; she" / ", and she"</td></tr>
+<tr><td>"Because they create..."</td><td>Fragment</td><td>Attach to previous sentence (remove period, lowercase "because")</td></tr>
+<tr><td>"soft beautiful"</td><td>Missing comma between adjectives</td><td>"soft, beautiful"</td></tr>
+<tr><td>"county fair, her work"</td><td>Comma splice</td><td>". Her" / "; her" / ", and her"</td></tr>
+</table>
+
+<h4 style="margin-top:16px">Model correct output:</h4>
+<div class="ex good"><div class="ex-label g">All errors fixed</div>"My sister loves painting. She spends hours in her studio every weekend. Her favorite medium is watercolors because they create soft, beautiful effects. She has won three awards at the county fair, and her work hangs in the library."</div>
+
+<h4 style="margin-top:20px">Expected errors & feedback:</h4>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Fixes 3 of 4 — misses the fragment</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">"My sister loves painting. She spends hours in her studio every weekend. Her favorite medium is watercolors. Because they create soft, beautiful effects. She has won three awards at the county fair, and her work hangs in the library."</div>
+<div class="ai-fb">You fixed 3 of 4 errors — strong work on the run-on, the comma splice, and the missing comma between adjectives. But look at "Because they create soft, beautiful effects." — can this stand alone as a complete sentence? It starts with "because," making it a dependent clause. It needs to connect to the sentence before it: "Her favorite medium is watercolors because they create soft, beautiful effects." <br><br><strong>Route:</strong> You understand run-ons and comma splices well. Your gap is fragments — specifically, dependent clauses starting with subordinating conjunctions. Returning to fragment identification practice before retrying.</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Fixes the run-on but creates a NEW comma splice</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">"My sister loves painting, she spends hours in her studio every weekend."</div>
+<div class="ai-fb">You spotted the run-on in sentence 1 — good. But your fix replaced it with a comma splice: "My sister loves painting, she spends hours..." still has two independent clauses joined only by a comma. You need either a period ("painting. She"), a semicolon ("painting; she"), or a comma + conjunction ("painting, and she"). <br><br><strong>Route:</strong> Returning to SCAN practice at labels-only level — focus on the A step (choosing the right fix type).</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Rewrites content instead of just fixing errors</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">"My sister is an amazing painter who loves art. She paints in watercolors and wins awards."</div>
+<div class="ai-fb">You rewrote the paragraph in your own words — and your version is error-free! But this task asks you to FIX the errors in the GIVEN paragraph while keeping the same content and structure. Don't rewrite from scratch — find each error in the original, fix ONLY that error, and leave everything else unchanged. This tests whether you can spot and repair problems, not whether you can write your own sentences (that's a different skill).</div>
+</div>
+</div>
+</div>
+</div><!-- end gate-s -->
+
+<!-- ===== PROVE TAB ===== -->
+<div class="tab" id="t-prove">
+<h2>Write Supporting Details</h2>
+<div class="meta">
+<span class="badge b-pos">Paragraphs Skill 15</span>
+<span class="badge b-mne">PROVE</span>
+<span class="badge b-pre">After: Finishing Transition Words</span>
+</div>
+
+<div class="section-box why">
+<h3>What SRSD Skill Is Being Taught</h3>
+<p><strong>Skill:</strong> Developing a single supporting detail fully — citing passage evidence, paraphrasing it, explaining its significance, and connecting it back to the main point.</p>
+<p style="margin-top:12px"><strong>Why it matters:</strong></p>
+<ul style="margin:8px 0 8px 20px">
+<li><strong>The #1 coaching observation:</strong> Elaboration ("the so what") is the first thing that vanishes under multi-paragraph load. Students give a detail but don't explain why it matters. This activity isolates that specific skill and gives it a mandatory, named step (V = Very important because).</li>
+<li><strong>The only paragraph element not taught in isolation:</strong> AlphaWrite teaches topic sentences (skills 5-7), sequencing (skill 3), relevance (skill 4), transitions (skills 13-14), and outlining (skills 9-11). It does NOT explicitly teach "how to cite evidence from a passage and explain its significance." PROVE fills that gap.</li>
+<li><strong>STAAR Trait 1 — depth of thought:</strong> The difference between Trait 1 Score 2 and Score 3 is "depth" — explained evidence versus merely stated evidence. PROVE directly trains the Score 3 behavior.</li>
+<li><strong>Passage-based from day one:</strong> Like Write a Paragraph from Prompt, students choose a topic they love and the system generates a passage about it. Students still write about what they care about — but they practice the specific skill of citing FROM the passage text and explaining why it matters. This builds the passage-referencing habit that STAAR demands without breaking the "write what they love" mandate.</li>
+<li><strong>Feeds into TREE/TIDE:</strong> Each R in TREE (each reason) and each I in TIDE (each important detail) is internally developed using PROVE. Learning PROVE first means students have the detail-level procedure before encountering the paragraph/essay-level structure.</li>
+</ul>
+</div>
+
+<div class="section-box mnemonic">
+<h3>PROVE Strategy</h3>
+<div class="mn-letter"><strong>P</strong><span><strong>Point</strong> — What are you trying to show? (connects to your topic sentence)</span></div>
+<div class="mn-letter"><strong>R</strong><span><strong>Reference</strong> — What does the passage say? (find a specific detail)</span></div>
+<div class="mn-letter"><strong>O</strong><span><strong>Own words</strong> — Paraphrase it (don't copy the passage word-for-word)</span></div>
+<div class="mn-letter"><strong>V</strong><span><strong>Very important because</strong> — Explain WHY this matters (the "so what")</span></div>
+<div class="mn-letter"><strong>E</strong><span><strong>End link</strong> — Connect back to your point (how does this support your claim?)</span></div>
+</div>
+
+<div class="section-box step step-see">
+<div class="step-tag">Step 1 — See It (Discrimination)</div>
+<h4>Question Type: Side-by-side comparison + reason selection</h4>
+<p>Student sees two versions of the same supporting detail — <strong>controlled for length</strong> — and identifies which does a better job PROVING the point. Length is matched so students must evaluate quality, not quantity.</p>
+
+<h4 style="margin-top:16px">Model question:</h4>
+<p><em>"Both responses try to support the point 'Dogs are loyal.' They are about the same length. Which one does a better job PROVING the point? Then select WHY."</em></p>
+
+<div class="ex bad"><div class="ex-label b">Version A (~50 words)</div>"Dogs are loyal animals. The passage mentions that dogs wait by the door. Dogs are really good pets and lots of people love having them. They are friendly and always want to play with their owners. Many families choose dogs because they are so loyal."</div>
+
+<div class="ex good"><div class="ex-label g">Version B (~50 words)</div>"Dogs are loyal. According to the passage, dogs wait by the door for hours when their owners leave. This shows that dogs form real emotional bonds — they remember and miss people even when they can't see them. This kind of devotion proves dogs are among the most loyal animals."</div>
+
+<p style="margin-top:12px;font-size:0.88rem;color:#555"><em>Both are ~50 words. The difference is NOT length — it's what they do with the words. Version A fills space with generic claims. Version B develops one specific detail with explanation.</em></p>
+
+<p style="margin-top:12px"><strong>Student selects why B is better (multiple correct):</strong></p>
+<ul style="margin-left:20px">
+<li>☑ "Uses a SPECIFIC detail from the passage — not just 'mentions' it but adds the specifics (for hours, when owners leave)" (R)</li>
+<li>☑ "Explains WHY the detail matters — what does waiting by the door actually prove?" (V)</li>
+<li>☑ "Connects back to the main point about loyalty at the end" (E)</li>
+<li>☐ "Is longer" (NOT valid — they're the same length)</li>
+<li>☐ "Uses bigger or better vocabulary" (NOT valid — vocabulary isn't the difference here)</li>
+</ul>
+
+<h4 style="margin-top:16px">What makes Version A weak despite being the same length:</h4>
+<ul style="margin-left:20px;font-size:0.88rem;color:#555">
+<li><strong>Vague passage reference:</strong> "mentions that dogs wait by the door" (no specifics — wait how long? when? why does that matter?)</li>
+<li><strong>No explanation of significance:</strong> States the fact and immediately moves on to unrelated claims</li>
+<li><strong>Filler that doesn't prove the point:</strong> "good pets," "people love them," "like to play" — none of this specifically proves LOYALTY</li>
+<li><strong>Circular ending:</strong> "families choose dogs because they are loyal" just restates the claim without developing it</li>
+</ul>
+
+<h4 style="margin-top:20px">Expected errors & feedback:</h4>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Student selects Version A as better</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">Selects A, possibly because it "mentions more things about dogs" or "talks about how people love dogs."</div>
+<div class="ai-fb">Version A says several nice things about dogs — they're friendly, people love them, they like to play. But does any of that specifically prove LOYALTY? Being friendly isn't the same as being loyal. Playing isn't loyalty. Version B focuses on ONE specific behavior — waiting by the door for hours — and then explains exactly WHY that proves loyalty: "they remember and miss people even when they can't see them." A detail that goes DEEP on one specific point is stronger than a response that goes wide on many unrelated points. Ask yourself: which version would actually convince someone that dogs are loyal?</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Student correctly picks B but selects "uses bigger words" as reason</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">Picks B (correct) but selects "Uses bigger or better vocabulary" as the reason why.</div>
+<div class="ai-fb">It's not about vocabulary — both versions use simple words. Look at what each version DOES with the passage detail:<br><br>• Version A: "The passage mentions that dogs wait by the door." → Then? Nothing about it. Moves to a different topic (playing, being friendly).<br>• Version B: "Dogs wait by the door for hours..." → "This SHOWS that dogs form real emotional bonds" → "This PROVES they are loyal."<br><br>B takes the detail and does two things with it: EXPLAINS what it means (V step) and CONNECTS it back to the point (E step). A just states the detail and abandons it. That's the difference — explanation and connection, not vocabulary.</div>
+</div>
+</div>
+</div>
+
+<div class="section-box step step-plan">
+<div class="step-tag">Step 2 — Plan It (PROVE Fields)</div>
+<h4>Question Type: Structured multi-field input (passage-based)</h4>
+<p>Student reads a passage, then fills in each PROVE field to plan one supporting detail.</p>
+
+<div class="passage">Community gardens are making a difference in neighborhoods across the country. In one study, neighborhoods with community gardens saw a 30% drop in crime. Residents reported feeling safer and more connected to their neighbors. People who had never spoken to each other started conversations while working side by side in the garden beds, building friendships that extended beyond the garden fence.</div>
+<div class="prompt">Support the point: "Community gardens help neighborhoods by bringing people together."</div>
+
+<h4>Model answer:</h4>
+<div class="field"><b>P</b><span>"Community gardens help neighborhoods by bringing people together."</span></div>
+<div class="field"><b>R</b><span>"The passage says that people who had never spoken to each other started conversations while working side by side in the garden beds."</span></div>
+<div class="field"><b>O</b><span>"Neighbors who used to be complete strangers became friends because they shared a workspace and spent time together regularly."</span></div>
+<div class="field"><b>V</b><span>"This matters because many neighborhoods struggle with isolation — people live next to each other for years without connecting. When people actually know their neighbors, they look out for each other, share resources, and the whole community becomes safer and friendlier."</span></div>
+<div class="field"><b>E</b><span>"This shows that community gardens don't just produce vegetables — they produce the human connections that make a neighborhood into a real community."</span></div>
+
+<h4 style="margin-top:20px">Expected errors & feedback:</h4>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Copies passage word-for-word (no O step)</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">R: "The passage says that people who had never spoken to each other started conversations while working side by side in the garden beds."<br>O: "People who had never spoken to each other started conversations while working side by side in the garden beds."</div>
+<div class="ai-fb">Your R (reference) correctly identifies a passage detail — good. But your O (own words) is almost identical to the passage text. Paraphrasing means expressing the SAME IDEA in DIFFERENT WORDS. Try this: close the passage in your mind. Now explain to a friend what happened in those gardens. You might say something like: "Strangers became friends because they worked next to each other." That's the same idea, your words.</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>V step is too short or just restates the detail</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">V: "This is important because it shows people talking."</div>
+<div class="ai-fb">Your V says "it shows people talking" — but that's just restating what the detail already said, not explaining WHY it matters. The V step asks: so what? Why should the reader CARE that neighbors started talking? Think bigger: What does it mean for a neighborhood when strangers become friends? What problems does it solve? What does it make possible? Push past the fact and into the SIGNIFICANCE.</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>R references a detail that doesn't match the point (P)</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">P: "Community gardens help neighborhoods by bringing people together."<br>R: "The passage says neighborhoods with gardens saw a 30% drop in crime."</div>
+<div class="ai-fb">The 30% crime drop is a strong detail — but does it support your specific point about "bringing people together"? Crime reduction is about safety, not connection. Your P says gardens help by CONNECTING people. Look for a detail about people INTERACTING: the passage mentions neighbors starting conversations and building friendships. That directly shows people coming together. Save the crime statistic for a different point (like "gardens make neighborhoods safer").</div>
+</div>
+</div>
+</div>
+
+<div class="section-box step step-do">
+<div class="step-tag">Step 3 — Do It (Production — GRADED)</div>
+<h4>Question Type: Text input — combine PROVE into flowing sentences</h4>
+<p>Student writes 2-4 sentences that turn their PROVE plan into connected prose. PROVE fields visible as reference.</p>
+
+<h4>Model answer:</h4>
+<p style="font-size:0.85rem;color:#555;margin-bottom:8px"><em>Note how the prose below maps directly to the PROVE fields from Step 2:</em></p>
+<div class="ex good"><div class="ex-label g">Student writes (combining P, R, O, V, E into flowing prose)</div>"Community gardens help neighborhoods by bringing people together. <span style='background:#e8f5e9'>[P→]</span> According to the passage, people who had never spoken to each other started having conversations while working side by side in the garden beds. <span style='background:#e3f2fd'>[R→]</span> In other words, complete strangers became friends because they shared a workspace and spent time together regularly. <span style='background:#fff3e0'>[O→]</span> This matters because many neighborhoods struggle with isolation — people live next door for years without connecting, and when neighbors finally know each other, they look out for one another and the whole community becomes safer. <span style='background:#fce4ec'>[V→]</span> This shows that community gardens don't just produce vegetables — they produce the human connections that turn a neighborhood into a real community. <span style='background:#f3e5f5'>[E→]</span>"</div>
+<p style="font-size:0.85rem;color:#555;margin-top:8px"><strong>Key point for grading:</strong> The student's prose should USE their PROVE plan, not ignore it. If a student fills in detailed PROVE fields in Step 2 but then writes something completely different in Step 3, the AI should flag it: "Your paragraph doesn't match your plan. In your R field you noted [X], but your paragraph doesn't mention it. Use your plan — that's why you made it."</p>
+
+<h4>AI grading criteria:</h4>
+<table>
+<tr><th>Element</th><th>What AI checks</th></tr>
+<tr><td>R — Passage evidence</td><td>Is a specific detail from the passage cited? (not just "the passage says gardens are good")</td></tr>
+<tr><td>O — Paraphrased</td><td>Is the evidence in the student's words? (not copied verbatim)</td></tr>
+<tr><td>V — Significance explained</td><td>Is there at least one sentence explaining WHY the detail matters?</td></tr>
+<tr><td>E — Links back to point</td><td>Does the detail connect back to the original claim?</td></tr>
+<tr><td>Coherence</td><td>Do the sentences flow together? (not just PROVE fields dumped sequentially)</td></tr>
+</table>
+</div>
+
+<div class="section-box step step-check">
+<div class="step-tag">Step 4 — Verify It (Targeted Questions)</div>
+<h4>Question Type: Short-answer verification against student's own draft</h4>
+
+<div class="verify-q">
+<div class="q-label">Verification Question 1</div>
+<div class="q-text">"What specific detail from the passage did you use? Type it or point to it."</div>
+<div class="q-response"><em>Student types:</em> "neighbors started talking while working in the garden"</div>
+<div class="q-ai"><strong>AI:</strong> Yes — that's a specific, identifiable detail from the passage. ✓<br><em>If student types something vague like "gardens are good":</em> "That's not a specific detail from the passage. A specific detail is something you could point to in the text — a fact, a quote, or a statistic. Look at your paragraph: did you actually include one? If not, add it."</div>
+</div>
+
+<div class="verify-q">
+<div class="q-label">Verification Question 2</div>
+<div class="q-text">"In one sentence, explain WHY that detail matters. (Not what it says — why it's important.)"</div>
+<div class="q-response"><em>Student types:</em> "It matters because when people know each other they look out for each other and the neighborhood is safer."</div>
+<div class="q-ai"><strong>AI checks against draft:</strong> Your explanation here is strong. Is this explanation actually IN your paragraph, or did you just think of it now? [AI verifies against submitted text] — Yes, a version of this explanation appears in your paragraph. ✓<br><em>If the explanation is NOT in their draft:</em> "Good explanation! But it's not in your paragraph — you just thought of it during this check. That means your draft is missing the V (Very important because). Go back and add this sentence to your paragraph before submitting."</div>
+</div>
+
+<div class="verify-q">
+<div class="q-label">Verification Question 3</div>
+<div class="q-text">"Does your detail support your POINT (that gardens bring people together)? How?"</div>
+<div class="q-response"><em>Student types:</em> "Yes because the detail is about strangers becoming friends which is literally people coming together."</div>
+<div class="q-ai"><strong>AI:</strong> Clear connection between detail and point. ✓<br><em>If the student can't articulate the connection:</em> "If you can't explain how your detail supports your point, it might be the wrong detail for this point. Either choose a detail that more directly shows people 'coming together,' or adjust your point to match what your detail actually shows."</div>
+</div>
+</div>
+
+</div><!-- end PROVE tab -->
+
+<!-- ===== TREE TAB ===== -->
+<div class="tab" id="t-tree">
+<h2>Write a Paragraph — Opinion (TREE)</h2>
+<div class="meta">
+<span class="badge b-pos">Paragraphs Skill 16 (NEW — before Write from Prompt)</span>
+<span class="badge b-mne">TREE</span>
+<span class="badge b-pre">After: PROVE | Before: Write a Paragraph from Prompt (existing mastery check)</span>
+</div>
+
+<div class="section-box why">
+<h3>What SRSD Skill Is Being Taught</h3>
+<p><strong>Skill:</strong> Planning and writing an opinion paragraph from a passage-based prompt using a memorizable strategy (TREE) that connects planning directly to production within a single workflow.</p>
+<p style="margin-top:12px"><strong>Why it matters:</strong></p>
+<ul style="margin:8px 0 8px 20px">
+<li><strong>The core diagnosis:</strong> AlphaWrite teaches planning (SPO, skills 9-10) and writing (Turn Outline into Draft, skill 11; Write from Prompt, skill 15/16) but the planning activities and writing activities are SEPARATE. Students never use their own plan to write their own draft in one connected workflow. TREE fixes this: plan and draft happen in the same activity, with the plan visible during drafting.</li>
+<li><strong>How TREE complements SPO:</strong> SPO (skills 9-10) teaches the CONCEPT of paragraph structure — what a plan looks like, how to create one. TREE gives students a MEMORABLE DEPLOYMENT PROCEDURE for that concept — a named strategy they can retrieve from memory on a test. SPO = "paragraphs have topic sentences, details, and conclusions." TREE = "when I sit down to write my opinion, I do T-R-E-E." SPO is the knowledge; TREE is the automatic procedure for using that knowledge.</li>
+<li><strong>Relationship to Write a Paragraph from Prompt:</strong> TREE is the SCAFFOLDED practice activity. Write a Paragraph from Prompt remains as the UNSCAFFOLDED mastery check. Students learn the strategy with support in TREE, then prove they can deploy it independently in Write from Prompt (where no TREE scaffold is visible). Sequence: learn with scaffold → practice with scaffold → prove without scaffold.</li>
+<li><strong>The mnemonic that scales:</strong> TREE at paragraph level (T = topic sentence, R = reasons, E = evidence + explanations, E = ending) later scales to essay level (T = thesis/intro, R = body paragraphs, E = development within each, E = conclusion). Students learn ONE strategy that works at two scales.</li>
+<li><strong>STAAR alignment:</strong> Opinion/Argumentative ECR is one of the available modes at every grade (G3-8). Worth 10 points. TREE directly teaches the organizational structure that earns Trait 1 Score 2-3.</li>
+</ul>
+<h4 style="margin-top:16px">How TREE fits in the revised sequence:</h4>
+<table>
+<tr><th>Skill</th><th>What it teaches</th><th>Scaffold level</th></tr>
+<tr><td>Turn Paragraph into SPO (skill 9)</td><td>SEE paragraph structure in existing text (discrimination)</td><td>N/A — analysis task</td></tr>
+<tr><td>Writing SPOs (skill 10)</td><td>CREATE a paragraph plan from scratch</td><td>Template provided</td></tr>
+<tr><td>Turn Outline into Draft (skill 11)</td><td>USE your plan to write (first plan-to-draft connection)</td><td>Own SPO from skill 10 visible</td></tr>
+<tr><td>PROVE (skill 15)</td><td>Develop a supporting detail with evidence + explanation</td><td>PROVE fields provided</td></tr>
+<tr><td><strong>TREE (skill 16) ← THIS</strong></td><td><strong>Plan + write an opinion paragraph using a named strategy</strong></td><td><strong>TREE fields provided (fades over time)</strong></td></tr>
+<tr><td>Write from Prompt (existing)</td><td>Write a paragraph independently (mastery check)</td><td>NO scaffold — proves ownership</td></tr>
+</table>
+</div>
+
+<div class="section-box mnemonic">
+<h3>TREE Strategy</h3>
+<div class="mn-letter"><strong>T</strong><span><strong>Topic/Claim</strong> — State your opinion in one clear sentence.</span></div>
+<div class="mn-letter"><strong>R</strong><span><strong>Reasons</strong> — List your reasons WHY you think this (2 reasons). Just the reasons — you'll develop them next.</span></div>
+<div class="mn-letter"><strong>E</strong><span><strong>Evidence + Explain</strong> — For EACH reason: What does the passage say that supports it? And WHY does that matter?</span></div>
+<div class="mn-letter"><strong>E</strong><span><strong>Ending</strong> — Wrap it up. Don't just repeat your claim — add a final thought.</span></div>
+<p style="margin-top:12px;font-size:0.88rem;color:#555"><strong>The logic:</strong> T = state your position. R = brainstorm your reasons (the "what"). E = develop each reason with evidence and explanation (the "proof"). E = close. Students think in stages: position first, then reasons, then development, then closure.</p>
+</div>
+
+<div class="section-box step step-see">
+<div class="step-tag">Step 1 — See It (Two-Part Discrimination)</div>
+<h4>Part A: Compare planned vs. unplanned writing</h4>
+<p>Student sees two paragraphs responding to the same prompt. One clearly used a plan (organized, developed). One didn't (rambling, undeveloped). Student identifies which is more organized and why.</p>
+
+<div class="prompt" style="margin-bottom:12px">Prompt both are responding to: "Do you think dogs make the best pets? Use evidence from the passage."</div>
+
+<div class="ex bad"><div class="ex-label b">Response A (unplanned — ~65 words)</div>"I think dogs are the best pets because they are really great animals to have around. The passage talks about dogs and how people like having them. Dogs are fun to play with and they are soft and furry. Also, dogs like going on walks with their owners, which is nice. Lots of people have dogs because they are good pets and make people happy."</div>
+
+<div class="ex good"><div class="ex-label g">Response B (planned with TREE — ~65 words)</div>"I believe dogs make the best pets because they are loyal and help people stay active. The passage says dogs wait by the door for hours when their owners leave, which shows they form real emotional bonds. The passage also mentions that dog owners walk 30 minutes more per day. This matters because walking keeps people healthy. Dogs make people both healthier and happier."</div>
+
+<p style="margin-top:12px;font-size:0.88rem;color:#555"><em>Both are ~65 words. Both are full sentences (not choppy fragments vs. polished prose). The difference is STRUCTURE and DEVELOPMENT: A is vague and circular (says dogs are great, then lists generic traits without passage evidence or explanation). B has a clear claim, specific passage evidence, explanation of why it matters, and an ending that extends the argument.</em></p>
+
+<p style="margin-top:12px"><strong>Student selects what makes B better:</strong></p>
+<ul style="margin-left:20px">
+<li>☑ "States a clear opinion with specific reasons upfront"</li>
+<li>☑ "Uses evidence from the passage to support the reasons"</li>
+<li>☑ "Explains why the evidence matters"</li>
+<li>☑ "Has an ending that wraps up the argument"</li>
+<li>☐ "Is longer" (they're similar length — not the reason)</li>
+</ul>
+
+<h4 style="margin-top:20px">Part B: Label the TREE elements in the strong response</h4>
+<p>Student now labels each part of Response B:</p>
+
+<div class="ex neutral"><div class="ex-label n">Student labels each sentence/group</div>
+<p><strong style="color:#7b1fa2">[T]</strong> "I believe dogs make the best pets because they are loyal and help people stay active."</p>
+<p><strong style="color:#7b1fa2">[R]</strong> Reason 1: loyalty. Reason 2: staying active.</p>
+<p><strong style="color:#7b1fa2">[E]</strong> "The passage says dogs wait by the door for hours..." (evidence for R1) + "which shows they form real emotional bonds" (explain R1). "The passage also mentions dog owners walk 30 minutes more..." (evidence for R2) + "This matters because walking keeps people healthy" (explain R2).</p>
+<p><strong style="color:#7b1fa2">[E]</strong> "Dogs don't just make life more fun — they make people healthier and happier."</p>
+</div>
+
+<p style="margin-top:12px;font-size:0.88rem;color:#555"><strong>Purpose of two-part discrimination:</strong> Part A builds intuition ("this one is better because it's organized"). Part B builds vocabulary ("the organization follows a pattern: T-R-E-E"). Now when students plan their own paragraph, they know what they're aiming for — they've SEEN it and LABELED it.</p>
+
+<div class="error-card" style="margin-top:16px">
+<div class="error-hdr"><h4>Student picks A as better organized</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">Selects Response A, possibly because "it has more sentences about dogs" or "it says dogs are fun."</div>
+<div class="ai-fb">Response A mentions several things about dogs (fun, furry, fetch, walks) — but ask yourself: does it ever PROVE that dogs are the best pets? Does it use the passage? Does it explain WHY any of those things matter? Response B picks TWO specific reasons (loyal + active), finds evidence in the passage for each, and explains why that evidence matters. That's an ARGUMENT. Response A is a list of things the writer likes — not an argument. Which would convince someone who doesn't already love dogs?</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Student can't label the TREE elements — puts wrong labels</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">Labels the first sentence as R instead of T, or can't find where E starts.</div>
+<div class="ai-fb">Let's work through it together:<br><br>• <strong>T (Topic/Claim):</strong> Which sentence tells you what the writer THINKS? "I believe dogs make the best pets..." — that's the opinion. That's T.<br>• <strong>R (Reasons):</strong> What are the reasons they give? "...because they are loyal and help people stay active." Those are two reasons listed in the same sentence as the claim. That's R.<br>• <strong>E (Evidence + Explain):</strong> Where do they PROVE those reasons? "The passage says dogs wait by the door..." (evidence) + "which shows they form real bonds" (explanation). Then "The passage mentions dog owners walk more..." (evidence) + "This matters because..." (explanation). All of that is E — developing each reason.<br>• <strong>E (Ending):</strong> The last sentence wraps it all up: "Dogs don't just make life more fun..." That's the ending — E.</div>
+</div>
+</div>
+</div>
+
+<div class="section-box step step-plan">
+<div class="step-tag">Step 2 — Plan It (TREE Fields)</div>
+<h4>Question Type: Structured multi-field — grouped by letter</h4>
+<p>Student reads a passage (generated from their chosen topic or provided), then fills in TREE. Each letter is a sequential planning stage. The fields group naturally: first brainstorm reasons (R), then develop evidence + explanation for each (E).</p>
+
+<div class="passage">A recent study found that students who had 30 minutes of recess instead of 15 scored 20% higher on afternoon tests. Researchers believe physical activity increases blood flow to the brain, improving concentration and memory. Students in the study also reported feeling happier and less stressed when given longer breaks, with 85% saying they wished recess were even longer. However, some teachers worry that adding recess time means losing instruction time, potentially putting students behind on required curriculum.</div>
+<div class="prompt">Do you think students should have longer recess? Use evidence from the passage to support your answer.</div>
+
+<h4 style="margin-top:16px">Exact fields the student fills in:</h4>
+
+<div class="field"><b>T</b><span><strong>Topic/Claim:</strong> "What is your opinion? Write it as one clear sentence."<br><br><em>Student writes:</em> "I believe students should have longer recess because it helps them learn better and feel better at school."</span></div>
+
+<div class="field"><b>R</b><span><strong>Reasons:</strong> "List your reasons (you need at least 2). Just the reasons — you'll find evidence for each next."<br><br><em>Student writes:</em><br>Reason 1: "Longer recess helps students do better on tests."<br>Reason 2: "Longer recess makes students happier and less stressed."</span></div>
+
+<div class="field"><b>E</b><span><strong>Evidence + Explain:</strong> "For EACH reason above, find evidence from the passage AND explain why it matters."<br><br><em>Reason 1:</em><br>Evidence from passage: "Students with 30 minutes of recess scored 20% higher on afternoon tests."<br>Why it matters: "This proves recess actually helps learning — it recharges the brain so students can focus better."<br><br><em>Reason 2:</em><br>Evidence from passage: "85% of students reported feeling happier and less stressed with longer breaks."<br>Why it matters: "Happy students pay attention more and cause fewer behavior problems, so teachers can teach better even with slightly less class time."</span></div>
+
+<div class="field"><b>E</b><span><strong>Ending:</strong> "How will you wrap up? Don't just repeat your claim — add a final thought."<br><br><em>Student writes:</em> "Schools that care about learning should give more recess, not less — because the science shows it makes everything else work better."</span></div>
+
+<h4 style="margin-top:16px">How the mnemonic maps to the planning flow:</h4>
+<table>
+<tr><th>Letter</th><th>Thinking stage</th><th>What student produces</th></tr>
+<tr><td><strong>T</strong></td><td>"What do I think?"</td><td>One sentence — their claim</td></tr>
+<tr><td><strong>R</strong></td><td>"Why do I think this?"</td><td>2 reasons listed (brainstorm — just the reasons, not the proof yet)</td></tr>
+<tr><td><strong>E</strong></td><td>"How can I prove each reason?"</td><td>For each reason: passage evidence + explanation of why it matters (this is where PROVE skills apply)</td></tr>
+<tr><td><strong>E</strong></td><td>"How do I wrap up?"</td><td>One sentence that extends beyond restating the claim</td></tr>
+</table>
+
+<p style="margin-top:16px;font-size:0.88rem;color:#555"><strong>Why grouping works:</strong> Students brainstorm ALL their reasons under R before developing any of them under E. This mirrors how good writers plan — cast a wide net first (what are my reasons?), then go deep on each (what's the evidence? why does it matter?). The plan is a THINKING tool, not a paragraph template. When drafting (Step 3), students interleave them naturally: reason 1 + its evidence/explanation, then reason 2 + its evidence/explanation. Their PROVE training prepares them for this interleaving.</p>
+
+<h4 style="margin-top:20px">Expected errors & feedback:</h4>
+
+<div class="error-card">
+<div class="error-hdr"><h4>R field uses personal experience instead of reasons that the passage can support</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">R: Reason 1: "I always feel better after playing outside." Reason 2: "My friends and I love recess."</div>
+<div class="ai-fb">Those are personal experiences, not reasons you can PROVE with the passage. The R step asks for reasons that the passage has EVIDENCE for. Look at the passage: it talks about test scores and stress levels. Try: "Longer recess helps students do better on tests" — can you find evidence for that in the passage? Yes (the 20% finding). That's a reason you can PROVE in the E step. Your reasons should be things the passage can back up.</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>E field has evidence but no explanation (missing the "why it matters")</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">E for Reason 1: Evidence: "Students scored 20% higher." Why it matters: [left blank or "it's important"]</div>
+<div class="ai-fb">You found strong evidence — the 20% score improvement is specific and compelling. But "it's important" doesn't explain WHY. The reader is thinking: "okay, students score higher... so what? What does that prove about your claim that recess should be longer?" Try finishing this sentence: "This proves that recess _____ because _____." For example: "This proves that recess actually helps learning because it gives the brain a chance to recharge."</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Only one reason listed under R</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">R: Reason 1: "Recess helps you learn." Reason 2: [blank]</div>
+<div class="ai-fb">You have one good reason — but TREE asks for at least 2. A strong opinion paragraph needs multiple reasons because one reason alone isn't very convincing. Look at the passage again: it mentions test scores AND happiness/stress. Those are two DIFFERENT reasons recess helps. Can you use both? Having two reasons makes your argument harder to argue against.</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Ending just repeats the claim</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">E (Ending): "I think students should have longer recess."</div>
+<div class="ai-fb">Your ending restates your T (claim) — but it doesn't add anything new. The reader already knows your position from the first sentence. A strong ending extends the argument: What should schools DO? What happens if they DON'T change? What's the bigger picture? Try: "Schools that care about learning should..." or "If recess improves both grades and happiness, then..." Give the reader something to think about beyond just your opinion.</div>
+</div>
+</div>
+</div>
+
+<div class="section-box step step-do">
+<div class="step-tag">Step 3 — Do It (Production — GRADED)</div>
+<h4>Question Type: Text input — full paragraph (TREE plan visible)</h4>
+<p>Student writes their complete opinion paragraph. Their TREE plan is displayed in a collapsible side panel for reference.</p>
+
+<h4>Model answer (G4 level):</h4>
+<div class="ex good"><div class="ex-label g">Strong response — meets all TREE elements</div>"I believe students should have longer recess because it actually helps them learn better. According to the passage, students who had 30 minutes of recess scored 20% higher on afternoon tests compared to students with only 15 minutes. This proves that recess doesn't waste learning time — it makes students' brains work better by giving them a chance to recharge. The passage also reports that 85% of students felt happier and less stressed with longer breaks. This matters because happy students pay attention more and cause fewer problems, which means teachers can actually teach more even with slightly less class time. Schools that truly care about learning should give students more recess, because the research shows it makes everything else work better."</div>
+
+<h4>AI grading criteria:</h4>
+<table>
+<tr><th>Element</th><th>Present?</th><th>Quality check</th></tr>
+<tr><td>T — Clear opinion/claim</td><td>Is there a sentence stating the student's position?</td><td>Is it specific (not "recess is good" but "students should have longer recess because...")?</td></tr>
+<tr><td>R — Reasons with evidence</td><td>Are 2 reasons given, each with a passage detail?</td><td>Are the details specific (numbers, facts) not vague ("the passage says recess is good")?</td></tr>
+<tr><td>E (within R) — Explanations</td><td>Is each piece of evidence explained?</td><td>Does the explanation answer "why does this matter for my argument?" (not just restate the evidence)?</td></tr>
+<tr><td>E — Ending</td><td>Is there a concluding sentence?</td><td>Does it do more than just repeat the claim? (adds a final thought or implication)</td></tr>
+<tr><td>Passage dependency</td><td>Is evidence FROM the passage?</td><td>Can the AI verify the detail exists in the provided text?</td></tr>
+</table>
+
+<div class="error-card" style="margin-top:16px">
+<div class="error-hdr"><h4>One-sentence paragraph — no development</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">"I think recess should be longer because it's fun and good for kids."</div>
+<div class="ai-fb">You stated your opinion (T) — that's a start. But your paragraph is just one sentence. TREE has four parts: T (your opinion — done), R (reasons with passage evidence — missing), E (explanations of why reasons matter — missing), and E (ending — missing). Look at your TREE plan: you planned reasons and evidence. Now write them out. Your paragraph should be 5-8 sentences that walk through your entire plan.</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Good structure but all reasons from personal experience, no passage</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">"I believe recess should be longer. My first reason is that I feel tired after sitting in class and need a break. My second reason is that my friends and I like playing soccer at recess. Recess makes school more fun."</div>
+<div class="ai-fb">Your paragraph has clear structure — T (opinion), two R's (reasons), and an E (ending). That's strong TREE organization! But the prompt says "use evidence from the passage." Your reasons come from personal experience, not the text. The passage has specific RESEARCH — like the 20% test score improvement and 85% of students feeling happier. Those facts are more convincing than personal preferences because they apply to all students, not just you. Replace your personal reasons with passage evidence, then explain what that evidence proves.</div>
+</div>
+</div>
+</div>
+
+<div class="section-box step step-check">
+<div class="step-tag">Step 4 — Verify It (Targeted Questions)</div>
+<h4>Question Type: Short-answer verification against student's own draft</h4>
+
+<div class="verify-q">
+<div class="q-label">Verification Question 1</div>
+<div class="q-text">"Copy your opinion/claim sentence from your paragraph. (Your T.)"</div>
+<div class="q-response"><em>Student copies:</em> "I believe students should have longer recess because it actually helps them learn better."</div>
+<div class="q-ai"><strong>AI:</strong> Clear claim identified. ✓ Your position is explicit and specific.<br><em>If student can't find one / copies a detail instead:</em> "The sentence you copied is a detail, not your opinion. Your opinion answers: what do YOU think about the question? If you can't find your opinion clearly stated in your first 1-2 sentences, your paragraph is missing its T. Add a sentence that clearly states your position."</div>
+</div>
+
+<div class="verify-q">
+<div class="q-label">Verification Question 2</div>
+<div class="q-text">"For your SECOND reason: what passage evidence did you use, and why does it matter?"</div>
+<div class="q-response"><em>Student types:</em> "85% of students felt happier with longer breaks. It matters because happy students learn better."</div>
+<div class="q-ai"><strong>AI checks against draft:</strong> Your evidence and explanation are both in your paragraph. ✓<br><em>If explanation is missing from draft:</em> "You just explained why the evidence matters — but that explanation isn't in your paragraph. Your draft says '85% felt happier' and then moves on. Add your 'why it matters' sentence after the evidence. You just wrote it here — put it in your paragraph too."</div>
+</div>
+
+<div class="verify-q">
+<div class="q-label">Verification Question 3</div>
+<div class="q-text">"Read your last sentence. Does it just repeat your first sentence, or does it add something new?"</div>
+<div class="q-response"><em>Student types:</em> "It adds something new — it says schools should make the change because science supports it."</div>
+<div class="q-ai"><strong>AI:</strong> Good — your ending extends beyond your opening claim. ✓ A strong ending adds implication, urgency, or a new angle rather than just restating.<br><em>If ending just repeats:</em> "Your last sentence is very similar to your first sentence. Instead of 'I think recess should be longer,' try ending with a final thought: What should schools DO about this? What happens if they DON'T change? That gives the reader something to think about."</div>
+</div>
+</div>
+
+</div><!-- end TREE -->
+
+<!-- ===== TIDE TAB ===== -->
+<div class="tab" id="t-tide">
+<h2>Write a Paragraph — Informational</h2>
+<div class="meta">
+<span class="badge b-pos">Paragraphs Skill 17</span>
+<span class="badge b-mne">TIDE</span>
+<span class="badge b-pre">After: TREE (Opinion)</span>
+</div>
+
+<div class="section-box why">
+<h3>What SRSD Skill Is Being Taught</h3>
+<p><strong>Skill:</strong> Planning and writing an informational/explanatory paragraph from a passage-based prompt using TIDE — a strategy for organizing factual explanation that is distinct from opinion writing (TREE).</p>
+<p style="margin-top:12px"><strong>Why it matters:</strong></p>
+<ul style="margin:8px 0 8px 20px">
+<li><strong>Genre confusion is a real failure mode:</strong> Students who have only practiced TREE (opinion) will write opinions when the prompt asks them to EXPLAIN. STAAR prompts like "Explain how the author shows..." require informational writing — no opinion needed. Students must learn to recognize the prompt type and switch strategies.</li>
+<li><strong>STAAR Informational ECR:</strong> Tested at every grade (G3-8), worth 10 points. Requires the student to explain what the passage says and why it matters — NOT state what they think. A different cognitive act from argumentation.</li>
+<li><strong>Heavier passage dependency:</strong> In TREE, the student's opinion drives the paragraph and the passage provides support. In TIDE, the passage's content drives the paragraph and the student provides explanation. This trains a different relationship with the text — more reading comprehension integrated with writing.</li>
+<li><strong>Builds on PROVE:</strong> TIDE's D step (Describe/Elaborate) is PROVE applied to informational detail. Students who mastered PROVE already know how to develop a detail — now they do it within an informational frame rather than an argumentative one.</li>
+<li><strong>Introduces genre discrimination:</strong> This is the first time students must distinguish between prompt types (opinion vs. informational) and deploy the correct strategy. TREE came first (opinion). Now they learn TIDE (informational) and practice switching between them.</li>
+<li><strong>Same relationship to Write from Prompt as TREE:</strong> TIDE is scaffolded practice. Write from Prompt (existing) is the unscaffolded mastery check where students prove they can write informational paragraphs without TIDE fields visible.</li>
+</ul>
+</div>
+
+<div class="section-box mnemonic">
+<h3>TIDE Strategy</h3>
+<div class="mn-letter"><strong>T</strong><span><strong>Topic</strong> — What is the controlling idea you're explaining? (from the passage/prompt, NOT your opinion)</span></div>
+<div class="mn-letter"><strong>I</strong><span><strong>Important details</strong> — List the key facts from the passage (2-3). Just the facts — you'll develop them next.</span></div>
+<div class="mn-letter"><strong>D</strong><span><strong>Describe/Elaborate</strong> — For EACH detail: explain it further. Why is it important? What does it mean? What would happen without it?</span></div>
+<div class="mn-letter"><strong>E</strong><span><strong>End</strong> — Conclude by connecting back to the controlling idea. What's the big picture?</span></div>
+<p style="margin-top:12px;font-size:0.88rem;color:#555"><strong>The logic:</strong> T = state the topic. I = identify the key facts (brainstorm stage — just list them). D = develop each fact with explanation (depth stage — go deeper). E = close. Like TREE, students think in stages: topic first, then facts, then development, then closure.</p>
+</div>
+
+<div class="section-box step step-see">
+<div class="step-tag">Step 1 — See It (Two-Part Discrimination)</div>
+<h4>Part A: Genre discrimination — this is where students learn to switch between TREE and TIDE</h4>
+<p>Now that students know TREE (opinion), they must learn to recognize when a prompt asks for something DIFFERENT. This is the first time they encounter the choice.</p>
+
+<div class="ex neutral"><div class="ex-label n">Prompt A</div>"Do you think students should have longer recess? Use evidence from the passage."<br><strong>→ Opinion → TREE</strong> <em>("Do you think" = your opinion)</em></div>
+<div class="ex neutral"><div class="ex-label n">Prompt B</div>"Explain how bees help plants grow. Use details from the passage."<br><strong>→ Informational → TIDE</strong> <em>("Explain how" = describe a process from the passage)</em></div>
+<div class="ex neutral"><div class="ex-label n">Prompt C</div>"Describe the steps an astronaut takes to prepare for a spacewalk. Use information from the passage."<br><strong>→ Informational → TIDE</strong> <em>("Describe the steps" = explain information, not state an opinion)</em></div>
+
+<p style="margin-top:12px"><strong>The key discrimination:</strong> Does the prompt ask what YOU THINK? → TREE. Does the prompt ask you to EXPLAIN what the passage SAYS? → TIDE.</p>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Student uses TREE for an informational prompt</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">Selects "Opinion / TREE" for "Explain how bees help plants grow."</div>
+<div class="ai-fb">Look at the key words: "Explain how." The prompt isn't asking what you THINK about bees — it's asking you to describe a PROCESS from the passage. You don't need an opinion here. You need to explain what the passage says about how pollination works. That's informational writing → TIDE. Save TREE for prompts that say "Do you think..." or "Do you agree..."</div>
+</div>
+</div>
+
+<h4 style="margin-top:24px">Part B: Compare planned vs. unplanned informational writing</h4>
+<p>Two responses to the same informational prompt, matched for length. Student identifies which is more developed.</p>
+
+<div class="prompt" style="margin-bottom:12px">Both respond to: "Explain how bees help plants grow."</div>
+
+<div class="ex bad"><div class="ex-label b">Response A (unplanned — ~60 words)</div>"Bees are really important for plants and nature. The passage says bees help plants. Bees fly around from flower to flower and they are fuzzy. Plants need bees to grow. Without bees there would be no plants. Bees are one of the most important insects in the whole world and they help a lot."</div>
+
+<div class="ex good"><div class="ex-label g">Response B (planned with TIDE — ~60 words)</div>"Bees help plants grow by carrying pollen between flowers. According to the passage, pollen sticks to bees' fuzzy bodies when they land on flowers. When they visit the next flower, that pollen transfers, allowing seeds to form. Without this process, many plants couldn't reproduce. Bees make it possible for both plants and people to survive."</div>
+
+<p style="margin-top:12px;font-size:0.88rem;color:#555"><em>Both ~60 words. A is vague ("bees help plants"), circular ("bees are important... they help a lot"), and doesn't explain the PROCESS. B identifies specific details from the passage, explains what they mean, and describes the actual mechanism.</em></p>
+
+<p style="margin-top:12px"><strong>Student selects why B is better:</strong></p>
+<ul style="margin-left:20px">
+<li>☑ "Explains the specific PROCESS (how pollen transfers)" </li>
+<li>☑ "Uses specific details from the passage (fuzzy bodies, seeds forming)"</li>
+<li>☑ "Explains what the detail MEANS (without this, plants can't reproduce)"</li>
+<li>☐ "Uses bigger vocabulary" (not the reason)</li>
+<li>☐ "Says bees are important more times" (A actually says this MORE — repetition isn't development)</li>
+</ul>
+</div>
+
+<div class="section-box step step-plan">
+<div class="step-tag">Step 2 — Plan It (TIDE Fields — Grouped by Letter)</div>
+<h4>Question Type: Structured multi-field — grouped by letter (same design as TREE)</h4>
+<p>Student reads a passage (generated from their chosen topic or provided), then fills in TIDE. Each letter is a sequential planning stage.</p>
+
+<div class="passage">Bees are essential pollinators. When a bee lands on a flower to drink nectar, tiny grains of pollen stick to its fuzzy body. As the bee flies to the next flower, some of that pollen rubs off onto the new flower's stigma, allowing fertilization to occur and seeds to form. Without this process of cross-pollination, many plants cannot reproduce. Scientists estimate that one-third of the food humans eat — including apples, strawberries, almonds, and blueberries — depends on bee pollination. A world without bees would mean a world without many of the fruits and vegetables we take for granted.</div>
+<div class="prompt">Explain how bees help plants grow. Use details from the passage.</div>
+
+<h4 style="margin-top:16px">Exact fields the student fills in:</h4>
+
+<div class="field"><b>T</b><span><strong>Topic:</strong> "What is the controlling idea? What is this passage mainly explaining?"<br><br><em>Student writes:</em> "Bees help plants grow by carrying pollen from one flower to another."</span></div>
+
+<div class="field"><b>I</b><span><strong>Important details:</strong> "List the key facts from the passage (you need at least 2). Just the facts — you'll explain them next."<br><br><em>Student writes:</em><br>Detail 1: "Pollen sticks to bees' fuzzy bodies when they land on flowers, then transfers to the next flower."<br>Detail 2: "One-third of the food we eat depends on bee pollination."</span></div>
+
+<div class="field"><b>D</b><span><strong>Describe/Elaborate:</strong> "For EACH detail above, explain WHY it's important. What does it mean? What would happen without it?"<br><br><em>Detail 1:</em><br>Why it's important: "Without this pollen transfer, flowers can't make seeds, so new plants can't grow. The bees are doing the job that lets plants reproduce."<br><br><em>Detail 2:</em><br>Why it's important: "This means bees don't just matter for plants — they matter for humans too. Without bees, we'd lose apples, strawberries, and many other foods we eat every day."</span></div>
+
+<div class="field"><b>E</b><span><strong>End:</strong> "How will you wrap up? Connect back to your topic — what's the big picture?"<br><br><em>Student writes:</em> "Bees play a vital role that no other creature does at this scale — they make both plant survival and human food production possible."</span></div>
+
+<h4 style="margin-top:16px">How TIDE maps to the planning flow:</h4>
+<table>
+<tr><th>Letter</th><th>Thinking stage</th><th>What student produces</th></tr>
+<tr><td><strong>T</strong></td><td>"What is this about?"</td><td>One sentence — the controlling/main idea from the passage</td></tr>
+<tr><td><strong>I</strong></td><td>"What are the key facts?"</td><td>2 details listed (brainstorm — just the facts, not the explanation yet)</td></tr>
+<tr><td><strong>D</strong></td><td>"What do these facts MEAN?"</td><td>For each detail: explanation of significance, cause/effect, implication</td></tr>
+<tr><td><strong>E</strong></td><td>"What's the big picture?"</td><td>One sentence that synthesizes and connects back to topic</td></tr>
+</table>
+
+<p style="margin-top:16px;font-size:0.88rem;color:#555"><strong>Key difference from TREE:</strong> In TREE, the student's own OPINION is the T and their own REASONS are the R. In TIDE, the PASSAGE's main idea is the T and the PASSAGE's facts are the I. The student doesn't state what they think — they explain what the text says. This is a fundamentally different cognitive task: reading comprehension + explanation rather than argumentation.</p>
+
+<h4 style="margin-top:20px">Expected errors & feedback:</h4>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Student writes opinion in T field instead of passage's main idea</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">T: "I think bees are really important and we should protect them."</div>
+<div class="ai-fb">Your T is an opinion ("I think...") — but this is an informational prompt. TIDE's T isn't about what YOU think. It's about what the PASSAGE is explaining. Re-read the prompt: "Explain how bees help plants grow." Your T should state the main idea: HOW do bees help? Try: "Bees help plants grow by..." — finish that sentence using what the passage tells you.</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Details not from the passage</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">I: Detail 1: "Bees make honey." Detail 2: "Bees do a waggle dance."</div>
+<div class="ai-fb">Those are real facts about bees — but are they in THIS passage? Your I (Important details) must come from the text provided. The passage talks about pollination (pollen sticking to bodies, transferring to new flowers, seeds forming) and food dependency (one-third of human food). Those are the details to use. The prompt says "use details from the passage" — not details you already know.</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>D just restates the detail (no deeper explanation)</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">I: "Pollen sticks to bees." D: "This is important because pollen sticks to bees."</div>
+<div class="ai-fb">Your D repeats what the I already said — that's not describing further. The D step asks: what does this detail MEAN? Try asking yourself: "What would happen WITHOUT this?" If pollen didn't stick to bees, then what? The flowers couldn't make seeds. New plants couldn't grow. THAT'S what makes it important. Push one step deeper: fact → consequence → significance.</div>
+</div>
+</div>
+</div>
+
+<div class="section-box step step-do">
+<div class="step-tag">Step 3 — Do It (Production — GRADED)</div>
+<h4>Question Type: Text input — full informational paragraph (TIDE plan visible)</h4>
+<p>Student writes their complete informational paragraph. TIDE plan displayed in collapsible side panel. Unlike TREE (where the student argues their position), here the student EXPLAINS what the passage says.</p>
+
+<h4>Model answer (G4 level):</h4>
+<div class="ex good"><div class="ex-label g">Strong informational response — matches TIDE plan</div>"Bees help plants grow by carrying pollen from one flower to another. <strong>[T→]</strong> According to the passage, when a bee lands on a flower, tiny pollen grains stick to its fuzzy body, and when it flies to the next flower, that pollen transfers over. <strong>[I1→]</strong> Without this step, the second flower couldn't make seeds, which means new plants wouldn't be able to grow. <strong>[D1→]</strong> The passage also states that one-third of the food humans eat depends on bee pollination, including apples, strawberries, and almonds. <strong>[I2→]</strong> This means bees aren't just important for plants — they're essential for feeding people too. <strong>[D2→]</strong> Bees play a vital role in making both plant survival and human food production possible. <strong>[E→]</strong>"</div>
+
+<h4>AI grading criteria:</h4>
+<table>
+<tr><th>Element</th><th>Present?</th><th>Quality check</th></tr>
+<tr><td>T — Controlling idea</td><td>Is there a sentence stating what the paragraph explains?</td><td>Is it the passage's main idea (not the student's opinion)?</td></tr>
+<tr><td>I — Important details</td><td>Are 2+ specific facts from the passage cited?</td><td>Are they actually in the passage? Are they specific (not vague)?</td></tr>
+<tr><td>D — Describe/Elaborate</td><td>Is each detail explained further?</td><td>Does the explanation go beyond restating? (consequence, significance, implication)</td></tr>
+<tr><td>E — Ending</td><td>Is there a concluding sentence?</td><td>Does it connect back to the topic and synthesize?</td></tr>
+<tr><td>Genre</td><td>Is it informational (not opinion)?</td><td>No "I think" / "I believe" / opinion language present?</td></tr>
+</table>
+
+<h4 style="margin-top:20px">Expected errors & feedback:</h4>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Student writes opinion paragraph (genre confusion)</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">"I think bees are amazing animals and we should protect them. My first reason is that bees make honey which is delicious..."</div>
+<div class="ai-fb">You wrote an OPINION paragraph (TREE) — "I think," personal reasons, arguing a position. But this prompt asks you to EXPLAIN a process: "How do bees help plants grow?" That's informational (TIDE). You don't need to state what you think about bees. You need to explain what the passage says about HOW pollination works. Switch to TIDE: What's the main process? (T) What are the key steps/facts? (I) What do they mean? (D) What's the big picture? (E)</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Lists facts without any elaboration (I without D)</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">"Bees help plants. Pollen sticks to bees. One-third of food needs bees. Bees are important."</div>
+<div class="ai-fb">You identified the key facts from the passage — good I (Important details) work. But your paragraph just LISTS them without explaining what they MEAN. After each fact, the reader needs to understand: SO WHAT? For "pollen sticks to bees" → what happens because of that? (It transfers to the next flower, allowing seeds to form.) For "one-third of food needs bees" → what does that mean for people? (We'd lose many fruits and vegetables.) Each fact needs its D (Describe) — push one level deeper.</div>
+</div>
+</div>
+</div>
+
+<div class="section-box step step-check">
+<div class="step-tag">Step 4 — Verify It (Targeted Questions)</div>
+
+<div class="verify-q">
+<div class="q-label">Verification Question 1</div>
+<div class="q-text">"Is your paragraph explaining information from the passage, or giving your opinion? Copy one sentence that proves it."</div>
+<div class="q-response"><em>Student types:</em> "'According to the passage, pollen sticks to bees' fuzzy bodies.' This proves it's informational — I'm explaining what the text says, not what I think."</div>
+<div class="q-ai"><strong>AI:</strong> Correct — that sentence explains passage content without opinion language. Your paragraph is informational. ✓<br><em>If student's draft contains opinion language:</em> "You said it's informational, but your paragraph includes 'I think bees are amazing' — that's opinion language. This is an informational prompt. Find and remove any 'I think' or 'I believe' sentences. Replace them with explanations of what the passage says."</div>
+</div>
+
+<div class="verify-q">
+<div class="q-label">Verification Question 2</div>
+<div class="q-text">"Pick one of your details. After you state the detail, do you explain what it MEANS or why it's IMPORTANT? Copy that explanation."</div>
+<div class="q-response"><em>Student types:</em> "'Without this step, the second flower couldn't make seeds, which means new plants wouldn't grow.'"</div>
+<div class="q-ai"><strong>AI checks against draft:</strong> Yes — this sentence explains the CONSEQUENCE of the detail (what happens without it). That's strong D (Describe) work. ✓<br><em>If student can't find an explanation in their draft:</em> "You couldn't copy an explanation sentence — that usually means your paragraph states facts but doesn't explain what they mean. After each detail, add a sentence starting with 'This means...' or 'Without this...' or 'This is important because...' — that's your D step."</div>
+</div>
+
+<div class="verify-q">
+<div class="q-label">Verification Question 3 (MC)</div>
+<div class="q-text">"Which strategy did this prompt need?"</div>
+<p style="margin:8px 0;font-size:0.9rem"><strong>Choices:</strong></p>
+<ul style="margin-left:20px;font-size:0.9rem">
+<li>○ TREE — because the prompt asked for my opinion</li>
+<li>● <strong>TIDE — because the prompt asked me to explain information from the passage ✓</strong></li>
+</ul>
+<div class="q-ai" style="margin-top:8px"><strong>If correct:</strong> "Right — 'Explain how...' means describe a process/concept from the text. That's TIDE, not TREE. You're building the genre-switching skill." ✓<br><strong>If wrong:</strong> "Look at the prompt words again: 'Explain how bees help plants grow.' It's not asking what you THINK — it's asking you to DESCRIBE a process. No opinion needed. That's TIDE territory."</div>
+</div>
+</div>
+
+</div><!-- end TIDE -->
+
+<!-- ===== COPS TAB ===== -->
+<div class="tab" id="t-cops">
+<h2>Edit a Paragraph</h2>
+<div class="meta">
+<span class="badge b-pos">Paragraphs Skill 18</span>
+<span class="badge b-mne">COPS</span>
+<span class="badge b-pre">After: TREE & TIDE</span>
+</div>
+
+<div class="section-box why">
+<h3>What SRSD Skill Is Being Taught</h3>
+<p><strong>Skill:</strong> Systematic proofreading — finding and fixing convention errors in written text using a named, category-based procedure (COPS).</p>
+<p style="margin-top:12px"><strong>Why it matters:</strong></p>
+<ul style="margin:8px 0 8px 20px">
+<li><strong>Students don't proofread:</strong> Direct coaching observation reveals students write, stop, and submit — no re-reading, no self-correction. COPS gives them a procedure for what "checking your work" actually means.</li>
+<li><strong>STAAR ECR Trait 2 (Conventions):</strong> 0-2 points. Students who produce good content (Trait 1 ≥ 1) but have convention errors lose these points unnecessarily. COPS targets exactly this: catch errors AFTER producing content.</li>
+<li><strong>Self-regulation for conventions:</strong> Currently the AI catches errors and tells students what to fix (external regulation). COPS teaches students to catch their OWN errors (self-regulation). On STAAR, no AI exists — students who have internalized COPS self-check; students who relied on AI feedback don't.</li>
+<li><strong>Different cognitive mode from writing:</strong> Editing requires "reading like a reader" (looking for errors) rather than "reading like a writer" (thinking about content). Teaching it separately, after TREE/TIDE, helps students understand that WRITING and EDITING are two different phases — write first, edit after.</li>
+<li><strong>Placement after TREE/TIDE:</strong> COPS is taught after production activities because students need to be producing paragraphs before they can learn to edit them. Ultimately, COPS becomes integrated into ALL subsequent writing activities as a post-draft step.</li>
+</ul>
+</div>
+
+<div class="section-box mnemonic">
+<h3>COPS Strategy</h3>
+<div class="mn-letter"><strong>C</strong><span><strong>Capitalization</strong> — First word of sentences. Proper nouns. Titles.</span></div>
+<div class="mn-letter"><strong>O</strong><span><strong>Organization</strong> — Does every sentence belong? Do they flow in order? Any off-topic?</span></div>
+<div class="mn-letter"><strong>P</strong><span><strong>Punctuation</strong> — Periods. Commas where needed. Apostrophes. (Use SCAN if you find a run-on.)</span></div>
+<div class="mn-letter"><strong>S</strong><span><strong>Spelling</strong> — Words that look wrong. Common mix-ups (their/there, its/it's).</span></div>
+</div>
+
+<div class="section-box step step-see">
+<div class="step-tag">Step 1 — See It (Error Identification)</div>
+<h4>Question Type: Sequential COPS-guided reading — one category at a time</h4>
+<p>Student reads the paragraph FOUR TIMES, each time looking for only ONE type of error. This teaches the COPS procedure: check C first (capitalization), then O (organization), then P (punctuation), then S (spelling). Each pass is a separate question.</p>
+
+<h4 style="margin-top:16px">The paragraph (displayed throughout all 4 passes):</h4>
+<div class="ex neutral"><div class="ex-label n">Paragraph with 5 errors (G4 level)</div>"sharks are amazing predators. They have rows of sharp teeth that regrow when they fall out. Ice cream is delicious on a hot day. Sharks can smell blood from far away wich helps them find food. they also have special sensors that detect electrical signals, this lets them find prey hiding in sand."</div>
+
+<h4 style="margin-top:20px">Pass 1 — C (Capitalization)</h4>
+<p><strong>Question:</strong> "Read the paragraph looking ONLY at capitalization. Tap any word that should start with a capital letter but doesn't."</p>
+<p><strong>Student taps:</strong> "sharks" (sentence 1) and "they" (sentence 5)</p>
+<p><strong>Correct answer:</strong> 2 capitalization errors found.</p>
+<div class="ai-fb" style="margin-top:8px"><strong>If student misses one:</strong> "You found 1 of 2. Remember: the FIRST word of EVERY sentence needs a capital. Read each sentence start: 'sharks...' — does that start with a capital? 'They...' — yes. 'Ice...' — yes. 'Sharks...' — yes. 'they...' — does that start with a capital? Check again."</div>
+
+<h4 style="margin-top:20px">Pass 2 — O (Organization)</h4>
+<p><strong>Question:</strong> "Now read the paragraph looking ONLY at organization. The topic is 'sharks as predators.' Tap any sentence that does NOT belong."</p>
+<p><strong>Student taps:</strong> "Ice cream is delicious on a hot day."</p>
+<p><strong>Correct answer:</strong> 1 organization error — this sentence is completely off-topic.</p>
+<div class="ai-fb" style="margin-top:8px"><strong>If student doesn't find it:</strong> "Read each sentence and ask: 'Does this help explain why sharks are amazing predators?' Sentence 1: shark predators — yes. Sentence 2: teeth that regrow — yes, predator feature. Sentence 3: ice cream on a hot day — does that tell us about sharks? No. That sentence doesn't belong."<br><br><strong>If student taps a correct sentence:</strong> "That sentence IS about sharks. For O (Organization), you're looking for something that has NOTHING to do with the topic. A sentence about ice cream in a paragraph about sharks — that doesn't belong. A sentence about shark teeth DOES belong."</div>
+
+<h4 style="margin-top:20px">Pass 3 — P (Punctuation)</h4>
+<p><strong>Question:</strong> "Now read looking ONLY at punctuation. Tap any spot where punctuation is wrong or missing."</p>
+<p><strong>Student taps:</strong> the comma in "signals, this lets them"</p>
+<p><strong>Correct answer:</strong> 1 punctuation error — comma splice (two independent clauses joined only by a comma).</p>
+<div class="ai-fb" style="margin-top:8px"><strong>If student doesn't find it:</strong> "Look at each comma in the paragraph. Read what's on EACH SIDE of the comma. 'electrical signals' — that's one complete thought. 'this lets them find prey' — is THAT also a complete thought? Yes! Two complete thoughts joined only by a comma = comma splice. This is what you learned in SCAN."<br><br><strong>If student misidentifies a correct comma:</strong> "That comma is actually correct — it's separating an introductory phrase from the main clause. For P errors, look specifically for: missing periods, comma splices (two complete thoughts with only a comma), or missing commas where they're needed."</div>
+
+<h4 style="margin-top:20px">Pass 4 — S (Spelling)</h4>
+<p><strong>Question:</strong> "Finally, read looking ONLY at spelling. Tap any word that looks misspelled."</p>
+<p><strong>Student taps:</strong> "wich"</p>
+<p><strong>Correct answer:</strong> 1 spelling error — "wich" should be "which"</p>
+<div class="ai-fb" style="margin-top:8px"><strong>If student doesn't find it:</strong> "Read each word slowly. Does every word look right? Look at 'wich' — does that look like a real word? Say it out loud. You might be thinking of 'which' — spelled w-h-i-c-h. The 'h' after 'w' is missing."</div>
+
+<h4 style="margin-top:20px">Summary shown to student after all 4 passes:</h4>
+<table>
+<tr><th>COPS Check</th><th>Errors found</th></tr>
+<tr><td>C — Capitalization</td><td>2 (sharks, they)</td></tr>
+<tr><td>O — Organization</td><td>1 (ice cream sentence)</td></tr>
+<tr><td>P — Punctuation</td><td>1 (comma splice)</td></tr>
+<tr><td>S — Spelling</td><td>1 (wich → which)</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>5 errors found</strong></td></tr>
+</table>
+
+<p style="margin-top:12px;font-size:0.88rem;color:#555"><strong>Why four separate passes (not "find all errors at once"):</strong> Reading for ALL errors simultaneously is cognitively overloading — students miss things because they're trying to check too many dimensions at once. COPS works because each pass has ONE focus. Students learn that systematic = thorough. On a test, they'll mentally do four passes: "First I'll check capitals... then check if everything belongs... then check punctuation... then check spelling." That's the self-regulation procedure COPS teaches.</p>
+
+<div class="error-card" style="margin-top:16px">
+<div class="error-hdr"><h4>Student rushes through passes and misses errors</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">Finds 3 of 5 errors across all four passes — missed one capitalization and the punctuation error.</div>
+<div class="ai-fb">You found 3 of 5 — good start but not thorough. Here's what you missed:<br><br>• C pass: You caught "sharks" but missed "they" at the start of sentence 5. Tip: on the C pass, look ONLY at the first word of each sentence. Ignore everything else.<br>• P pass: You said punctuation was fine, but look at "signals, this lets them find prey." Read each side of that comma: "electrical signals" — complete thought? Yes. "this lets them find prey" — complete thought? Yes. Two complete thoughts + only a comma = comma splice. Remember SCAN: Stop at every comma and check both sides.</div>
+</div>
+</div>
+</div>
+
+<div class="section-box step step-plan">
+<div class="step-tag">Step 2 — Plan It (Choose Your Fixes)</div>
+<h4>Question Type: Multiple choice — for each error found, select the fix</h4>
+<p>For each error identified in Step 1, student selects HOW to fix it. This separates FINDING errors (Step 1) from CHOOSING fixes (Step 2) — two different cognitive operations.</p>
+
+<h4 style="margin-top:16px">Error 1: "sharks" (C error)</h4>
+<p><strong>Question:</strong> "How do you fix this capitalization error?"</p>
+<ul style="margin-left:20px">
+<li>● <strong>Capitalize the S → "Sharks" ✓</strong></li>
+<li>○ Add a period before it</li>
+<li>○ Remove the word</li>
+</ul>
+
+<h4 style="margin-top:16px">Error 2: "Ice cream is delicious on a hot day." (O error)</h4>
+<p><strong>Question:</strong> "This sentence doesn't belong. What should you do with it?"</p>
+<ul style="margin-left:20px">
+<li>● <strong>Remove it entirely — it's off-topic ✓</strong></li>
+<li>○ Move it to the end of the paragraph</li>
+<li>○ Change it to be about sharks</li>
+</ul>
+<div class="ai-fb" style="margin-top:8px"><strong>If student selects "change it to be about sharks":</strong> "That would work in theory, but that's rewriting, not editing. When you find an O error (off-topic sentence), the simplest fix is to remove it. The paragraph works perfectly without it — every other sentence is about sharks."</div>
+
+<h4 style="margin-top:16px">Error 3: "signals, this lets them" (P error)</h4>
+<p><strong>Question:</strong> "This is a comma splice. How will you fix it?" (Uses SCAN knowledge)</p>
+<ul style="margin-left:20px">
+<li>○ Add 'and' after the comma → "signals, and this lets them"</li>
+<li>● <strong>Replace comma with period → "signals. This lets them" ✓</strong></li>
+<li>○ Remove the comma entirely</li>
+</ul>
+<p style="font-size:0.85rem;color:#555">(Multiple correct answers possible — both period and comma + conjunction work. AI accepts any grammatically correct fix.)</p>
+
+<h4 style="margin-top:16px">Error 4: "wich" (S error)</h4>
+<p><strong>Question:</strong> "What is the correct spelling?"</p>
+<p><strong>Student types:</strong> "which"</p>
+
+<h4 style="margin-top:16px">Error 5: "they" (C error)</h4>
+<p><strong>Question:</strong> "How do you fix this capitalization error?"</p>
+<ul style="margin-left:20px">
+<li>● <strong>Capitalize the T → "They" ✓</strong></li>
+</ul>
+
+<p style="margin-top:16px;font-size:0.88rem;color:#555"><strong>Why separate finding from fixing:</strong> Step 1 tests discrimination (CAN you see the error?). Step 2 tests knowledge (DO you know how to fix it?). Some students can see errors but don't know the fix. Others know fixes but can't spot errors. Separating the steps lets the AI diagnose which skill is weak. If a student finds all errors but picks wrong fixes → they need more grammar instruction. If they pick correct fixes but miss errors → they need more careful reading/COPS procedure practice.</p>
+</div>
+
+<div class="section-box step step-do">
+<div class="step-tag">Step 3 — Do It (Rewrite — GRADED)</div>
+<h4>Question Type: Full paragraph rewrite with all errors fixed</h4>
+
+<div class="ex good"><div class="ex-label g">Model corrected paragraph</div>"Sharks are amazing predators. They have rows of sharp teeth that regrow when they fall out. Sharks can smell blood from far away, which helps them find food. They also have special sensors that detect electrical signals. This lets them find prey hiding in sand."</div>
+
+<h4>AI grading criteria:</h4>
+<table>
+<tr><th>Check</th><th>What AI verifies</th></tr>
+<tr><td>All C errors fixed</td><td>Sentence starts and proper nouns capitalized</td></tr>
+<tr><td>O error resolved</td><td>Off-topic sentence removed (not just moved)</td></tr>
+<tr><td>P error fixed</td><td>Comma splice resolved (period, semicolon, or comma + conjunction)</td></tr>
+<tr><td>S error fixed</td><td>"wich" → "which"</td></tr>
+<tr><td>No new errors introduced</td><td>Student didn't accidentally break something while fixing</td></tr>
+</table>
+</div>
+
+<div class="section-box step step-check">
+<div class="step-tag">Step 4 — Verify It (Targeted Questions)</div>
+
+<div class="verify-q">
+<div class="q-label">Verification Question 1</div>
+<div class="q-text">"Which sentence did you remove and why?"</div>
+<div class="q-response"><em>Student types:</em> "I removed 'Ice cream is delicious on a hot day' because it has nothing to do with sharks."</div>
+<div class="q-ai"><strong>AI:</strong> Correct — that sentence is off-topic. A paragraph about sharks as predators should only contain sentences about sharks and predation. ✓</div>
+</div>
+
+<div class="verify-q">
+<div class="q-label">Verification Question 2</div>
+<div class="q-text">"How did you fix the punctuation error? What was wrong and what did you change?"</div>
+<div class="q-response"><em>Student types:</em> "I split 'signals, this lets them' into two sentences because it was a comma splice."</div>
+<div class="q-ai"><strong>AI:</strong> Correct identification and fix. Two independent clauses were joined only by a comma — splitting into separate sentences resolves it. ✓</div>
+</div>
+
+<div class="verify-q">
+<div class="q-label">Verification Question 3</div>
+<div class="q-text">"Read your corrected paragraph one more time. Do you see any remaining errors? (Type 'none' or describe what you found.)"</div>
+<div class="q-response"><em>Student types:</em> "None — I checked all four COPS categories."</div>
+<div class="q-ai"><strong>AI cross-checks student's submitted paragraph:</strong> Confirmed — no remaining errors. ✓<br><em>If errors DO remain:</em> "You said 'none,' but I found one remaining issue: [specific error]. Try the COPS check one more time — which category (C, O, P, or S) would catch this?"</div>
+</div>
+</div>
+
+</div><!-- end COPS -->
+
+<!-- ===== MULTI-PARAGRAPH TAB ===== -->
+<div class="tab" id="t-multi">
+<h2>Multi-Paragraph Opinion Essay</h2>
+<div class="meta">
+<span class="badge b-pos">Multi-Paragraph Course, Skill 1</span>
+<span class="badge b-mne">TREE (Essay Level)</span>
+<span class="badge b-pre">Prerequisite: Paragraph Mastery Gate passed</span>
+</div>
+
+<div class="section-box why">
+<h3>What SRSD Skill Is Being Taught</h3>
+<p><strong>Skill:</strong> Planning and writing a multi-paragraph opinion essay from a passage-based prompt, using TREE scaled from paragraph level to essay level — with explicit instruction on how the same strategy works at a larger scale.</p>
+<p style="margin-top:12px"><strong>Why it matters:</strong></p>
+<ul style="margin:8px 0 8px 20px">
+<li><strong>Addresses the #1 repeated failure:</strong> Q11 Extended Essay is the most common error across G3-G8 students in the testing loop. Students have never written multi-paragraph responses in the platform.</li>
+<li><strong>The largest single STAAR point opportunity:</strong> ECR = 10 points. The rubric requires intro + body + conclusion even at G3. Students who write one paragraph — however excellent — cap at Trait 1 Score 1 (= 2 raw points). Multi-paragraph structure alone moves students to Score 2 (= 4 raw points). +2-4 points per student.</li>
+<li><strong>TREE scales — but the transition must be explicitly taught:</strong> Students already know TREE for paragraphs. Now they learn that TREE ALSO works for essays, but each letter gets BIGGER. The Step 1 discrimination explicitly shows paragraph-TREE vs. essay-TREE side by side, so students understand the scaling — it's not assumed.</li>
+<li><strong>Solves the elaboration collapse:</strong> When students attempted multi-paragraph writing on assessments, elaboration vanished — not because they can't elaborate, but because organizational demands consumed their working memory. The essay-level TREE plan externalizes organization → frees bandwidth for paragraph-level quality (including PROVE within each body paragraph).</li>
+<li><strong>Multi-session design:</strong> At 20-25 minutes per session, students may need 2 sessions. Session 1: read + plan (TREE). Session 2: write (with plan visible). The saved TREE plan eliminates working-memory loss between days.</li>
+</ul>
+</div>
+
+<div class="section-box mnemonic">
+<h3>TREE at Essay Level — How It Scales</h3>
+<p style="margin-bottom:16px">Students already know paragraph-TREE. Essay-TREE uses the SAME letters but each part becomes a PARAGRAPH instead of a sentence:</p>
+<table>
+<tr><th>Letter</th><th>Paragraph TREE (already learned)</th><th>Essay TREE (new scale)</th></tr>
+<tr><td><strong>T</strong></td><td>Topic sentence (one sentence)</td><td>Thesis = intro PARAGRAPH (claim + preview of reasons)</td></tr>
+<tr><td><strong>R</strong></td><td>Reasons listed (in same paragraph)</td><td>Each reason = its own BODY PARAGRAPH (reason + evidence + explanation)</td></tr>
+<tr><td><strong>E</strong></td><td>Evidence + explain (in same paragraph)</td><td>Evidence + explain WITHIN each body paragraph (uses PROVE)</td></tr>
+<tr><td><strong>E</strong></td><td>Ending sentence</td><td>Ending = conclusion PARAGRAPH (restate + extend)</td></tr>
+</table>
+<p style="margin-top:12px;font-size:0.88rem;color:#555"><strong>The key message to students:</strong> "You already know TREE. Same letters, same order, same thinking. But now each part gets its own paragraph. T was one sentence — now it's a short intro paragraph. Each R was a reason — now each reason gets its OWN paragraph with evidence and explanation inside it. E was one sentence — now it's a short conclusion paragraph."</p>
+</div>
+
+<div class="section-box step step-see">
+<div class="step-tag">Step 1 — See It (TREE Scaling Discrimination)</div>
+<h4>Part A: See how TREE scales from paragraph to essay</h4>
+<p>Student sees a paragraph-TREE response AND an essay-TREE response to the same prompt, side by side. They identify what's the same (same letters, same order) and what's different (each letter became a paragraph).</p>
+
+<div class="ex neutral"><div class="ex-label n">Paragraph TREE (what you've been doing)</div>"<strong>[T]</strong> I think dogs make the best pets because they are loyal and keep you active. <strong>[R]</strong> The passage says dogs wait by the door for hours. <strong>[E]</strong> This shows they form real bonds. The passage also says dog owners walk more. <strong>[E]</strong> This proves dogs make people both happier and healthier. <strong>[E-ending]</strong> Dogs are the best pets for anyone who wants a loyal, active companion."<br><br><em>→ One paragraph. T-R-E-E all in the same block of text.</em></div>
+
+<div class="ex good"><div class="ex-label g">Essay TREE (what you'll learn now)</div>"<strong>[T — Intro paragraph]</strong><br>I believe dogs make the best pets because they are loyal and help people stay active. These two qualities make dogs better companions than any other pet.<br><br><strong>[R — Body paragraph 1]</strong><br>First, dogs are incredibly loyal. According to the passage, dogs wait by the door for hours when their owners leave, even when they don't know when the person will return. This shows dogs form real emotional bonds — they remember and miss people. That kind of loyalty is rare in any animal.<br><br><strong>[R — Body paragraph 2]</strong><br>Second, dogs keep their owners healthy. The passage states that dog owners walk 30 minutes more per day than non-owners. This matters because regular walking prevents heart disease and reduces stress, which means dogs are literally making their owners live longer.<br><br><strong>[E — Conclusion paragraph]</strong><br>Dogs aren't just fun to have around — they give people both emotional connection and better health. For anyone looking for a pet that will genuinely improve their life, a dog is the clear choice."</div>
+
+<p style="margin-top:16px"><strong>Student answers:</strong> "What is the SAME between these two responses?"</p>
+<ul style="margin-left:20px">
+<li>☑ Both have T (a clear opinion/claim) at the start</li>
+<li>☑ Both have R (reasons with evidence from the passage)</li>
+<li>☑ Both have E (explanations of why evidence matters)</li>
+<li>☑ Both have E (an ending that wraps up)</li>
+</ul>
+
+<p style="margin-top:12px"><strong>Student answers:</strong> "What is DIFFERENT?"</p>
+<ul style="margin-left:20px">
+<li>☑ In the essay, each letter gets its own PARAGRAPH (not just a sentence)</li>
+<li>☑ The essay has paragraph breaks between T, R, R, and E</li>
+<li>☑ Each R body paragraph is fully developed (evidence + explanation + connection)</li>
+<li>☑ The essay is longer because each section has room to develop</li>
+</ul>
+
+<h4 style="margin-top:20px">Part B: Genre discrimination (quick — they already know this from TIDE)</h4>
+<div class="prompt">"Do you agree or disagree that zoos do more good than harm? Write a response with multiple paragraphs. Use evidence from the passage."</div>
+<p style="margin-top:8px">Student identifies: <strong>Opinion → TREE</strong>. And: <strong>"multiple paragraphs" → Essay-level TREE (each letter = a paragraph)</strong></p>
+
+<div class="error-card" style="margin-top:16px">
+<div class="error-hdr"><h4>Student doesn't understand the scaling — thinks essay TREE is completely different from paragraph TREE</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">Student seems confused by the comparison or can't identify what's the same.</div>
+<div class="ai-fb">Think of it this way: TREE is like a recipe that works for a small cake or a big cake. Same ingredients (T, R, E, E), same order. But for a big cake, you use MORE of each ingredient.<br><br>Paragraph TREE: T = one sentence. R = reasons in one paragraph. E = ending sentence.<br>Essay TREE: T = a whole intro paragraph. R = each reason gets its OWN paragraph. E = a whole conclusion paragraph.<br><br>Same strategy. More room for each part. That's the only difference.</div>
+</div>
+</div>
+</div>
+
+<div class="section-box step step-see">
+<div class="step-tag">Step 2 — Comprehension Check (MC)</div>
+<h4>Question Type: 2 quick MC questions verifying passage understanding</h4>
+<div class="passage">Zoos have long been debated. Supporters point to breeding programs that have saved species like the California condor from extinction — bringing their numbers from 27 birds in 1987 to over 500 today. Zoos also educate: 700 million people visit annually, and research shows visitors leave with greater concern for conservation. Critics counter that even top-tier enclosures can't match wild habitats. African elephants roam up to 50 miles daily in the wild; zoo elephants pace in spaces smaller than a parking lot. Some captive animals develop stereotypic behaviors — repetitive pacing, head-bobbing, self-harm — that never occur in wild populations.</div>
+
+<p style="margin-top:12px"><strong>Q1:</strong> "What evidence does the passage give FOR zoos?"<br>
+<em>→ Breeding programs saved species / 700 million visitors educated / Greater conservation concern</em></p>
+<p><strong>Q2:</strong> "What evidence does the passage give AGAINST zoos?"<br>
+<em>→ Can't match natural habitat / Elephants roam 50mi vs parking lot / Stereotypic behaviors</em></p>
+
+<p style="margin-top:12px;color:#555;font-size:0.88rem"><strong>Purpose:</strong> Ensures student actually read and understood the passage before writing. Addresses the "Ian's tacos" problem — forces engagement with assigned content. Also identifies students who need reading support before writing support.</p>
+</div>
+
+<div class="section-box step step-plan">
+<div class="step-tag">Step 3 — Plan It (Essay-Level TREE — Grouped Fields)</div>
+<h4>Question Type: Structured multi-field — same T-R-E-E grouping as paragraph TREE, but now each part becomes a paragraph</h4>
+<p>Same field design students already know from paragraph TREE. The only difference: each letter now plans a PARAGRAPH instead of a sentence. The fields look familiar — the output is bigger.</p>
+
+<h4 style="margin-top:16px">Exact fields the student fills in:</h4>
+
+<div class="field"><b>T</b><span><strong>Thesis (becomes your intro paragraph):</strong> "What is your opinion? Write your claim clearly. You can also preview your reasons."<br><br><em>Student writes:</em> "Zoos do more good than harm because they save endangered species and inspire millions of people to protect wildlife."<br><br><em>Note to student:</em> "In your essay, this becomes your intro paragraph. You can add 1-2 more sentences to introduce the topic before or after your claim."</span></div>
+
+<div class="field"><b>R</b><span><strong>Reasons (each becomes its own body paragraph):</strong> "List your reasons. Each reason will be its own paragraph in your essay."<br><br><em>Student writes:</em><br>Reason 1: "Breeding programs save species from extinction."<br>Reason 2: "Zoos educate people about conservation."<br><br><em>Note to student:</em> "In paragraph TREE, your reasons were in the same paragraph. In essay TREE, each reason gets its OWN paragraph — with evidence and explanation inside it."</span></div>
+
+<div class="field"><b>E</b><span><strong>Evidence + Explain (for each reason — this becomes the CONTENT of each body paragraph):</strong><br><br><em>Reason 1:</em><br>Evidence from passage: "California condors went from 27 birds in 1987 to over 500 today thanks to zoo breeding."<br>Why it matters: "Without zoos, these animals would be extinct. Zoos are the last line of defense when natural habitat is gone."<br><br><em>Reason 2:</em><br>Evidence from passage: "700 million visitors per year; research shows they leave with greater concern for wildlife."<br>Why it matters: "People protect what they understand. A child who sees a real condor may grow up to fight for habitat preservation."<br><br><em>Note to student:</em> "This is the same E step you know from paragraph TREE — evidence + explain for each reason. The difference: each reason's evidence + explanation now fills an entire body paragraph, not just 1-2 sentences."</span></div>
+
+<div class="field"><b>E</b><span><strong>Ending (becomes your conclusion paragraph):</strong> "How will you wrap up? Restate your position + add a final thought. This becomes a short paragraph."<br><br><em>Student writes:</em> "While zoos aren't perfect — no enclosure matches the wild — they give endangered animals a future and create the conservationists who will protect wild habitats for all animals."<br><br><em>Note to student:</em> "In paragraph TREE, this was one sentence. In essay TREE, you can expand it into 2-3 sentences that form a conclusion paragraph."</span></div>
+
+<h4 style="margin-top:16px">How essay TREE maps to essay structure:</h4>
+<table>
+<tr><th>TREE field</th><th>Becomes in essay</th><th>Expected length</th></tr>
+<tr><td>T (Thesis)</td><td>Introduction paragraph</td><td>2-3 sentences (claim + context or preview)</td></tr>
+<tr><td>R, Reason 1</td><td>Body paragraph 1</td><td>4-6 sentences (reason + evidence + explanation + connection)</td></tr>
+<tr><td>R, Reason 2</td><td>Body paragraph 2</td><td>4-6 sentences (reason + evidence + explanation + connection)</td></tr>
+<tr><td>E (Ending)</td><td>Conclusion paragraph</td><td>2-3 sentences (restate + extend + final thought)</td></tr>
+</table>
+
+<p style="margin-top:12px;font-size:0.88rem;color:#555"><strong>Transition support:</strong> The "Note to student" annotations in each field explicitly tell students how essay-TREE differs from paragraph-TREE. These notes fade over time (present in first 5 activities, removed after that — students should understand the scaling by then).</p>
+</div>
+
+<div class="section-box step step-do">
+<div class="step-tag">Step 4 — Do It (Multi-Paragraph Draft — GRADED)</div>
+<h4>Question Type: Extended text input — essay (TREE plan visible in side panel)</h4>
+
+<h4>Model answer (G5 level):</h4>
+<div class="ex good"><div class="ex-label g">Strong multi-paragraph response — Trait 1: 3/3</div>
+<p><strong>[Intro — T]</strong><br>I believe zoos do more good than harm. While some people worry about animals in captivity, zoos save endangered species and inspire millions of people to care about wildlife. These two benefits outweigh the drawbacks.</p>
+<p style="margin-top:10px"><strong>[Body 1 — R1 + PROVE]</strong><br>First, zoos run breeding programs that save animals from extinction. According to the passage, California condors were down to only 27 birds in 1987 — dangerously close to disappearing forever. Thanks to zoo breeding programs, their numbers have grown to over 500 today. This matters because without zoos stepping in, the condor would be extinct. For species that have lost their natural habitat, zoos are sometimes the only chance at survival.</p>
+<p style="margin-top:10px"><strong>[Body 2 — R2 + PROVE]</strong><br>Second, zoos educate people and build support for conservation. The passage states that 700 million people visit zoos every year, and research shows they leave with greater concern for wildlife. This is important because people protect what they understand and care about. A child who sees a real elephant at a zoo may grow up to donate money or volunteer to protect elephant habitat in the wild. Without that early connection, most people would never think about endangered species at all.</p>
+<p style="margin-top:10px"><strong>[Conclusion — E]</strong><br>While zoos aren't perfect and no enclosure can fully replace the wild, they do something irreplaceable: they keep endangered species alive and create the next generation of people who will fight to protect wildlife. That makes them worth supporting.</p>
+</div>
+
+<h4 style="margin-top:16px">AI Grading (ECR-aligned rubric):</h4>
+<table>
+<tr><th>Trait</th><th>Score</th><th>Evidence</th></tr>
+<tr><td>Trait 1: Development & Organization</td><td><strong>3/3</strong></td><td>Clear thesis, organized (intro/2 body/conclusion), specific passage evidence in both body paragraphs, each explained with depth, logical flow</td></tr>
+<tr><td>Trait 2: Conventions</td><td><strong>2/2</strong></td><td>No significant errors; does not interfere with meaning</td></tr>
+</table>
+
+<h4 style="margin-top:20px">Expected errors & feedback:</h4>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Everything in one paragraph (no paragraph breaks)</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">Student writes a solid argument — thesis, two reasons with evidence, conclusion — but all in a single unbroken paragraph.</div>
+<div class="ai-fb">Your IDEAS are strong — you have a clear claim, two supported reasons, and a conclusion. That's excellent TREE thinking. But you put it all in one paragraph. A multi-paragraph response needs separate paragraphs for each section. Look at your TREE plan:<br><br>• T → Introduction paragraph<br>• R1 → Body paragraph 1<br>• R2 → Body paragraph 2<br>• E → Conclusion paragraph<br><br>Each letter gets its own paragraph. Start a new line before each new section. This is what the rubric means by "organized" — the reader can see your structure.</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>Elaboration collapse — second body paragraph is thin</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">Body 1: Well-developed (5 sentences, evidence + explanation). Body 2: "Zoos also teach people about animals." (One sentence, no evidence, no explanation.)</div>
+<div class="ai-fb">Your first body paragraph is excellent — you cited the condor evidence and explained why it matters (strong PROVE). But your second body paragraph is just one sentence with no evidence or explanation. It got the same treatment as an afterthought.<br><br>Look at your TREE plan for R2: you planned to use the "700 million visitors" detail and explain that people protect what they understand. That's all in your plan — you just didn't write it out. Give R2 the same depth you gave R1: state the reason → cite the evidence → explain WHY it matters → connect it back to your thesis. Each body paragraph should be 3-5 sentences minimum.</div>
+</div>
+</div>
+
+<div class="error-card">
+<div class="error-hdr"><h4>No passage evidence — all personal opinion</h4><span class="error-arr">▼</span></div>
+<div class="error-body">
+<div class="err-student">"I love going to the zoo with my family. The animals are cool and the gift shop has stuffed animals. I think zoos are good because they make kids happy."</div>
+<div class="ai-fb">You shared your opinion (T) and you clearly like zoos. But this prompt asks you to use "evidence from the passage" — specific facts from the text you read. Personal experiences like visiting with family are fine to mention briefly, but your REASONS need to come from the passage's evidence, not memories.<br><br>The passage mentions breeding programs that saved the California condor (numbers went from 27 to 500+). It mentions 700 million visitors learning about conservation. Those are facts that support your position more strongly than "the gift shop is fun" — because they apply to everyone, not just you. Use your TREE plan: what evidence did you identify in your R fields?</div>
+</div>
+</div>
+</div>
+
+<div class="section-box step step-check">
+<div class="step-tag">Step 5 — Verify It (Targeted Questions)</div>
+
+<div class="verify-q">
+<div class="q-label">Verification Question 1</div>
+<div class="q-text">"How many paragraphs did you write? List what each one does."</div>
+<div class="q-response"><em>Student types:</em> "4 paragraphs. 1: intro with my thesis. 2: first reason about breeding. 3: second reason about education. 4: conclusion."</div>
+<div class="q-ai"><strong>AI verifies against submission:</strong> Confirmed — 4 distinct paragraphs present with clear organizational roles. ✓<br><em>If student says "1" or "2":</em> "You wrote [X] paragraph(s), but a multi-paragraph response needs at least 4: intro (T), body 1 (R1), body 2 (R2), and conclusion (E). Go back and break your writing into separate paragraphs — one for each part of your TREE plan."</div>
+</div>
+
+<div class="verify-q">
+<div class="q-label">Verification Question 2</div>
+<div class="q-text">"In your SECOND body paragraph: what evidence from the passage did you cite? And why does it matter?"</div>
+<div class="q-response"><em>Student types:</em> "700 million people visit zoos. It matters because people protect what they care about."</div>
+<div class="q-ai"><strong>AI checks against draft:</strong> Both the evidence and the explanation appear in your paragraph. ✓<br><em>If student can't answer or answer doesn't match draft:</em> "You're struggling to identify the evidence in your second body paragraph. That usually means it's missing or vague. Look at your draft: does body paragraph 2 contain a specific fact from the passage? If not, add one. Your TREE plan has it — use it."</div>
+</div>
+
+<div class="verify-q">
+<div class="q-label">Verification Question 3</div>
+<div class="q-text">"Does your conclusion just repeat your introduction, or does it add a new thought? What's the new thought?"</div>
+<div class="q-response"><em>Student types:</em> "It adds that zoos create the next generation of conservationists — people who will protect wild habitats."</div>
+<div class="q-ai"><strong>AI:</strong> Good — your conclusion extends beyond restating your thesis. It adds implication (future impact). ✓<br><em>If conclusion just repeats:</em> "Your conclusion is very similar to your introduction. Both say 'zoos save species and educate people.' A stronger ending asks: SO WHAT? What does this mean for the future? What should people DO? Add one sentence with a new thought or call to action."</div>
+</div>
+</div>
+
+</div><!-- end multi -->
+
+<!-- ===== ECR GATE TAB ===== -->
+<div class="tab" id="t-gate-e">
+<h2>ECR Mastery Gate (STAAR Simulation)</h2>
+<div class="meta">
+<span class="badge b-pos">Multi-Paragraph Course, Final Skill</span>
+<span class="badge b-mne">No scaffold — proves ownership</span>
+<span class="badge b-pre">All Multi-Paragraph skills mastered</span>
+</div>
+
+<div class="section-box why">
+<h3>What SRSD Skill Is Being Taught</h3>
+<p><strong>Skill:</strong> Independent performance — deploying all internalized strategies (genre recognition, TREE/TIDE planning, PROVE for detail development, COPS for proofreading) without any external scaffold, under timed conditions, on assigned content.</p>
+<p style="margin-top:12px"><strong>Why it matters:</strong></p>
+<ul style="margin:8px 0 8px 20px">
+<li><strong>This IS the test:</strong> STAAR gives students a passage, a prompt, and a blank box. No mnemonic, no planning template, no checklist, no AI feedback, no revision. This gate replicates those exact conditions inside the platform for the first time.</li>
+<li><strong>Distinguishes true ownership from scaffold dependence:</strong> Students who score well on TREE/TIDE activities (with scaffold) but fail here are scaffold-dependent — they haven't internalized the strategy. This gate reveals who truly owns their strategies and who needs more practice at the scaffold-reduced level.</li>
+<li><strong>One shot, no revision:</strong> Every other AlphaWrite activity allows revision. This gate doesn't. It trains students for the reality that on STAAR, their first draft IS their final draft. Whatever strategies they deploy, they must deploy on the first attempt.</li>
+<li><strong>Diagnostic power:</strong> The rubric score tells you exactly WHERE the student's independent performance breaks down: missing organization (didn't plan with TREE), missing evidence (didn't use PROVE), missing explanation (didn't do V step), convention errors (didn't COPS check). Each failure maps to a specific strategy that needs more practice.</li>
+<li><strong>"Assessment ready" definition:</strong> A student who passes this gate (Trait 1 ≥ 2, Trait 2 ≥ 1) has demonstrated they can independently produce a developed, organized, evidence-based multi-paragraph response from an assigned passage under time pressure. That is the definition of STAAR-ready.</li>
+</ul>
+</div>
+
+<div class="gate-box">
+<h4>Gate Design: STAAR Conditions</h4>
+<p style="margin-top:8px">No mnemonic labels. No TREE/TIDE fields. No PROVE structure. No COPS checklist. No tutorial link. No revision loop.<br><br>
+<strong>Student sees:</strong> Passage + Prompt + Blank text area + Timer (~20-25 min).<br>
+<strong>Student does:</strong> Everything from memory — identify prompt type, plan (mentally or on scratch), write, self-check, submit.<br>
+<strong>System does:</strong> Grades the first draft. Reports the score. Routes based on diagnosis. Does NOT allow retry on same prompt.</p>
+</div>
+
+<div class="section-box step step-do">
+<div class="step-tag">Single Step — Independent Performance</div>
+<h4>What the student sees:</h4>
+
+<div class="passage">Schools across the country are debating homework policies. A 2023 Stanford study found that students averaging more than two hours of homework per night reported significantly higher stress, less sleep, and more physical health complaints. A separate Duke University meta-analysis found that moderate homework (30-60 minutes) correlated with 15% higher test scores in middle school, though the effect was negligible in elementary grades. Teachers argue homework reinforces daily lessons and builds time management skills. Parents increasingly report that excessive homework strains family relationships and leaves no time for play, sports, or creative pursuits. Some districts have experimented with no-homework policies and report improved student wellbeing with no measurable decline in test scores.</div>
+
+<div class="prompt">Do you think schools should reduce the amount of homework given to students? Write a response with multiple paragraphs. Use evidence from the passage to support your answer.</div>
+
+<div style="background:#f8f8f8;border:2px dashed #ccc;border-radius:8px;padding:48px;text-align:center;margin:16px 0;color:#999">
+<p style="font-size:1.3rem">[ Blank text area ]</p>
+<p style="font-size:0.85rem;margin-top:12px">No scaffold. No planning fields. No mnemonic.<br>Timer: 22:00 remaining</p>
+</div>
+
+<p style="font-size:0.88rem;color:#555">The student must do everything from memory: recognize this is an opinion prompt → mentally plan with TREE (or physically on scratch) → write multiple paragraphs with evidence → self-check with internalized COPS → submit.</p>
+</div>
+
+<div class="section-box">
+<h3>Scoring & Feedback</h3>
+<p style="margin-bottom:16px"><strong>Pass criteria:</strong> Trait 1 ≥ 2 AND Trait 2 ≥ 1</p>
+
+<table>
+<tr><th>Score</th><th>What it means</th><th>Feedback to student</th><th>System routing</th></tr>
+<tr><td style="color:#4caf50;font-weight:700">Trait 1: 3</td><td>Clear thesis, organized (intro/body/conclusion), passage evidence in multiple paragraphs, explained with depth</td><td>"Excellent. You deployed your planning strategy independently under timed conditions. Clear structure, strong evidence, good depth. You are assessment-ready."</td><td>PASS — mark as STAAR-ready</td></tr>
+<tr><td style="color:#ff9800;font-weight:700">Trait 1: 2</td><td>Central idea present, some organization, evidence present but not fully developed</td><td>"Solid response with a clear position and multiple paragraphs. To reach Score 3: every body paragraph needs specific passage evidence AND an explanation of why it matters. Your [specific paragraph] had a reason but thin evidence."</td><td>PASS (barely) — recommend continued practice</td></tr>
+<tr><td style="color:#f44336;font-weight:700">Trait 1: 1</td><td>Main idea present but limited development, possibly single paragraph, minimal evidence</td><td>"Your response shows an opinion but limited development. You wrote [1/2] paragraph(s) where the rubric requires multiple. Take 2 minutes to plan before writing next time: T (claim) → R (reason 1) → R (reason 2) → E (ending). That gives you 4 paragraphs automatically."</td><td>FAIL → Route to TREE practice at labels-only level (5 more essays), then new gate prompt</td></tr>
+<tr><td style="color:#b71c1c;font-weight:700">Trait 1: 0</td><td>Doesn't address prompt, insufficient content, off-topic</td><td>"Your response doesn't address the prompt or doesn't have enough content to score. Before writing, re-read the question: what does it ask? What is your opinion? Try to plan — even 4 words (T-R-R-E) — before you start writing."</td><td>FAIL → Route to TREE at full scaffold level (10 essays), then labels-only (5), then new gate</td></tr>
+<tr><td style="color:#1976d2;font-weight:700">Trait 2: 0 (with Trait 1 ≥ 1)</td><td>Content present but conventions significantly impair readability</td><td>"Your ideas and organization are solid, but convention errors make it hard to read: [specific examples]. Practice COPS self-check after every draft."</td><td>Route to COPS practice (5 editing activities + 3 TREE paragraphs with mandatory COPS), then new gate</td></tr>
+</table>
+</div>
+
+<div class="section-box">
+<h3>What Makes This Different From Every Other AlphaWrite Activity</h3>
+<table>
+<tr><th>Dimension</th><th>All other activities</th><th>ECR Mastery Gate</th></tr>
+<tr><td>Scaffold</td><td>Present (mnemonic fields, tutorials, labels)</td><td>Completely absent</td></tr>
+<tr><td>Revision</td><td>AI feedback + retry until passing</td><td>One shot. First draft = final score.</td></tr>
+<tr><td>Content</td><td>Often student-chosen topics</td><td>Always assigned passage (STAAR format)</td></tr>
+<tr><td>Planning</td><td>Structure provided (fields to fill in)</td><td>Student must self-initiate from memory</td></tr>
+<tr><td>Self-monitoring</td><td>Verification questions guide the check</td><td>Student must self-check with no prompting</td></tr>
+<tr><td>Purpose</td><td>Teach and practice the skill</td><td>PROVE you own the skill independently</td></tr>
+<tr><td>Failure response</td><td>Revise current work</td><td>Diagnostic routing + new prompt (never same prompt)</td></tr>
+<tr><td>Success meaning</td><td>Passed this activity</td><td>Assessment-ready. Strategies are internalized.</td></tr>
+</table>
+</div>
+</div><!-- end ECR gate -->
+
+</div><!-- end container -->
+
+<script>
+// Tab navigation
+document.querySelectorAll('.nav button').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.nav button').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('t-' + btn.getAttribute('data-tab')).classList.add('active');
+  });
+});
+
+// Error card expand/collapse
+document.addEventListener('click', function(e) {
+  var target = e.target;
+  // Walk up from clicked element to find .error-hdr
+  while (target && target !== document) {
+    if (target.classList && target.classList.contains('error-hdr')) {
+      var card = target.parentElement;
+      if (card.classList.contains('open')) {
+        card.classList.remove('open');
+      } else {
+        card.classList.add('open');
+      }
+      return;
+    }
+    target = target.parentElement;
+  }
+});
+</script>
+</body>
+</html>
