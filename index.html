@@ -162,7 +162,7 @@ td{padding:8px 12px;border-bottom:1px solid #eee}
 <tr><td><strong>2. Full scaffold + NO revision</strong></td><td>Full field labels + descriptions</td><td>One shot — first draft scored</td><td>First-draft quality WITH scaffold support</td><td>Activities 4-6</td></tr>
 <tr><td><strong>3. Labels only + revision</strong></td><td>Letters only (T, R, E, E — no descriptions)</td><td>AI feedback + retry</td><td>Strategy recall (can you remember what each letter means?)</td><td>Activities 7-10</td></tr>
 <tr><td><strong>4. Labels only + NO revision</strong></td><td>Letters only</td><td>One shot</td><td>Strategy recall + first-draft quality combined</td><td>Activities 11-13</td></tr>
-<tr><td><strong>5. No scaffold + no revision (Gate)</strong></td><td>None — blank page</td><td>One shot</td><td>Full independence — proves ownership</td><td>Write from Prompt / Mastery Gate</td></tr>
+<tr><td><strong>5. No scaffold + no revision (Gate)</strong></td><td>No mnemonic structure — passage, prompt, optional unlabeled planning area (digital scratch paper), draft box</td><td>One shot</td><td>Full independence — proves ownership</td><td>Write from Prompt / Mastery Gate</td></tr>
 </table>
 <p style="margin-top:12px;font-size:0.88rem;color:#555"><strong>Why Phase 2 matters:</strong> Without it, students jump from "scaffold + revision" directly to "no scaffold + no revision" (the gate). That's removing TWO supports at once. Phase 2 removes revision while keeping the scaffold — so students practice first-draft quality before the scaffold is ALSO taken away. Phase 4 removes the scaffold descriptions while keeping the letters — so students practice recall before going fully blank. Each phase removes ONE support at a time.</p>
 <p style="font-size:0.88rem;color:#555"><strong>Additional design elements that appear at specific phases:</strong></p>
@@ -1587,7 +1587,7 @@ td{padding:8px 12px;border-bottom:1px solid #eee}
 <p><strong>Skill:</strong> Independent performance — deploying all internalized strategies (genre recognition, TREE/TIDE planning, PROVE for detail development, COPS for proofreading) without any external scaffold, under timed conditions, on assigned content.</p>
 <p style="margin-top:12px"><strong>Why it matters:</strong></p>
 <ul style="margin:8px 0 8px 20px">
-<li><strong>This IS the test:</strong> STAAR gives students a passage, a prompt, and a blank box. No mnemonic, no planning template, no checklist, no AI feedback, no revision. This gate replicates those exact conditions inside the platform for the first time.</li>
+<li><strong>This IS the test:</strong> STAAR gives students a passage, a prompt, scratch paper, and a blank response box — no mnemonic, no planning template, no checklist, no AI feedback, no revision. This gate replicates those exact conditions inside the platform for the first time (the optional planning area is the scratch-paper equivalent).</li>
 <li><strong>Distinguishes true ownership from scaffold dependence:</strong> Students who score well on TREE/TIDE activities (with scaffold) but fail here are scaffold-dependent — they haven't internalized the strategy. This gate reveals who truly owns their strategies and who needs more practice at the scaffold-reduced level.</li>
 <li><strong>One shot, no revision:</strong> Every other AlphaWrite activity allows revision. This gate doesn't. It trains students for the reality that on STAAR, their first draft IS their final draft. Whatever strategies they deploy, they must deploy on the first attempt.</li>
 <li><strong>Diagnostic power:</strong> The rubric score tells you exactly WHERE the student's independent performance breaks down: missing organization (didn't plan with TREE), missing evidence (didn't use PROVE), missing explanation (didn't do V step), convention errors (didn't COPS check). Each failure maps to a specific strategy that needs more practice.</li>
@@ -1598,9 +1598,10 @@ td{padding:8px 12px;border-bottom:1px solid #eee}
 <div class="gate-box">
 <h4>Gate Design: STAAR Conditions</h4>
 <p style="margin-top:8px">No mnemonic labels. No TREE/TIDE fields. No PROVE structure. No COPS checklist. No tutorial link. No revision loop.<br><br>
-<strong>Student sees:</strong> Passage + Prompt + Blank text area + Timer (~20-25 min).<br>
-<strong>Student does:</strong> Everything from memory — identify prompt type, plan (mentally or on scratch), write, self-check, submit.<br>
-<strong>System does:</strong> Grades the first draft. Reports the score. Routes based on diagnosis. Does NOT allow retry on same prompt.</p>
+<strong>Student sees:</strong> Passage + Prompt + an OPTIONAL unlabeled planning area (digital scratch paper — no structure, no field prompts) + Draft box + Timer (~20-25 min).<br>
+<strong>Student does:</strong> Everything from memory — identify prompt type, optionally jot a plan in the blank planning area (structure self-initiated, not provided), write, self-check, submit.<br>
+<strong>System does:</strong> Grades the first DRAFT only (planning area is ungraded). Records whether the student used the planning area (planning-vs-outcome signal). Reports the score. Routes based on diagnosis. Does NOT allow retry on same prompt.</p>
+<p style="margin-top:10px;font-size:0.85rem;opacity:0.85">Why an optional planning area and not a literally blank page: STAAR gives students scratch paper. A gate with no planning space at all would be HARDER than the real test. The planning area carries NO mnemonic labels — the student must supply the structure from memory — so it still tests internalization, while matching real test conditions and capturing the diagnostic signal (do planners outperform non-planners?).</p>
 </div>
 
 <div class="section-box step step-do">
@@ -1611,12 +1612,13 @@ td{padding:8px 12px;border-bottom:1px solid #eee}
 
 <div class="prompt">Do you think schools should reduce the amount of homework given to students? Write a response with multiple paragraphs. Use evidence from the passage to support your answer.</div>
 
-<div style="background:#f8f8f8;border:2px dashed #ccc;border-radius:8px;padding:48px;text-align:center;margin:16px 0;color:#999">
-<p style="font-size:1.3rem">[ Blank text area ]</p>
-<p style="font-size:0.85rem;margin-top:12px">No scaffold. No planning fields. No mnemonic.<br>Timer: 22:00 remaining</p>
+<div style="background:#f8f8f8;border:2px dashed #ccc;border-radius:8px;padding:24px;text-align:center;margin:16px 0;color:#999">
+<p style="font-size:0.95rem;border-bottom:1px dashed #ccc;padding-bottom:12px;margin-bottom:12px">[ Optional planning area — blank, no labels, ungraded ]</p>
+<p style="font-size:1.3rem;padding-top:8px">[ Draft box ]</p>
+<p style="font-size:0.85rem;margin-top:12px">No mnemonic structure. Planning area is optional and carries no TREE/TIDE labels.<br>Timer: 22:00 remaining</p>
 </div>
 
-<p style="font-size:0.88rem;color:#555">The student must do everything from memory: recognize this is an opinion prompt → mentally plan with TREE (or physically on scratch) → write multiple paragraphs with evidence → self-check with internalized COPS → submit.</p>
+<p style="font-size:0.88rem;color:#555">The student must do everything from memory: recognize this is an opinion prompt → optionally plan in the blank planning area, supplying the TREE structure themselves (it is not provided) → write multiple paragraphs with evidence → self-check with internalized COPS → submit. Only the draft is graded; whether the student used the planning area is recorded for the planning-vs-outcome signal.</p>
 </div>
 
 <div class="section-box">
